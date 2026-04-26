@@ -2,254 +2,1544 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Pro-Learner Suite</title>
-<script src="https://code.responsivevoice.org/responsivevoice.js?key=FREE"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>熟語マスター Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root { --bg: #0d1117; --card: #161b22; --border: #30363d; --text: #e6edf3; --sub: #8b949e; --accent: #58a6ff; --green: #3fb950; --orange: #d29922; }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 80px; }
-  .container { max-width: 500px; margin: 0 auto; padding: 15px; }
-  
-  /* Header & Nav */
-  header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-  h1 { font-size: 18px; font-weight: 800; color: var(--text); }
-  h1 span { color: var(--accent); }
-  .nav-scroll { overflow-x: auto; display: flex; gap: 8px; margin-bottom: 20px; padding-bottom: 5px; scrollbar-width: none; }
-  .nav-scroll::-webkit-scrollbar { display: none; }
-  .ntab { border: none; border-bottom: 3px solid transparent; background: none; color: var(--sub); padding: 8px 12px; font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; }
-  .ntab.active { color: var(--accent); border-bottom-color: var(--accent); }
+:root {
+  --bg: #07090f;
+  --card: #0e1420;
+  --border: #1c2a40;
+  --accent: #4f8ef7;
+  --gold: #f0b429;
+  --red: #ef4444;
+  --green: #22c55e;
+  --text: #e8edf5;
+  --muted: #4a5568;
+  --dim: #8899aa;
+  --lv1: #64748b;
+  --lv2: #8b5cf6;
+  --lv3: #3b82f6;
+  --lv4: #f59e0b;
+  --lv5: #22c55e;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans JP', sans-serif;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  user-select: none;
+  overflow: auto;
+}
 
-  /* UI Elements */
-  .card { background: var(--card); border: 1.5px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-  .pill { border: 1.5px solid var(--border); border-radius: 25px; background: var(--card); color: var(--text); padding: 12px 20px; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.2s; display: block; text-align: center; text-decoration: none; margin-bottom: 10px; }
-  .pill:active { transform: scale(0.98); opacity: 0.8; }
-  .btn-accent { background: var(--accent); border-color: var(--accent); color: #fff; }
-  
-  /* Flashcard Flip */
-  .flip-wrap { perspective: 1000px; height: 300px; margin-bottom: 20px; }
-  .flip-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; }
-  .flip-inner.is-flipped { transform: rotateY(180deg); }
-  .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 25px; border: 1.5px solid var(--border); }
-  .card-front { background: linear-gradient(135deg, #1c2128, #161b22); }
-  .card-back { background: var(--card); transform: rotateY(180deg); border-color: rgba(88, 166, 255, 0.4); }
+/* ═══ HEADER ═══ */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 100;
+}
+.logo { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--accent); }
+.nav-btn {
+  border: 1px solid var(--border); background: var(--card); color: var(--dim);
+  border-radius: 8px; cursor: pointer; padding: 6px 12px; font-size: 13px;
+  font-family: inherit; transition: all .15s;
+}
+.nav-btn:hover { color: var(--text); }
 
-  /* Writing Mode */
-  textarea { width: 100%; background: var(--bg); color: var(--text); border: 1.5px solid var(--border); border-radius: 8px; padding: 12px; font-family: inherit; font-size: 14px; margin-bottom: 10px; resize: none; }
-  
-  /* Sanskrit Canvas */
-  #sketchpad { background: #fff; border-radius: 8px; touch-action: none; cursor: crosshair; display: block; margin: 0 auto 10px; }
+/* ═══ PAGES ═══ */
+.page { display: none; padding: 20px; max-width: 640px; margin: 0 auto; width: 100%; }
+.page.active { display: block; }
 
-  /* Toast */
-  #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--accent); color: white; padding: 10px 25px; border-radius: 25px; font-weight: 700; opacity: 0; transition: 0.3s; z-index: 1000; pointer-events: none; }
-  #toast.show { opacity: 1; }
+/* ═══ HOME ═══ */
+.stat-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 16px; padding: 20px; margin-bottom: 16px;
+}
+.stat-title { font-size: 14px; color: var(--muted); margin-bottom: 12px; letter-spacing: 1px; text-transform: uppercase; }
+.stat-big { font-size: 48px; font-weight: 700; font-family: 'Playfair Display', serif; }
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.stat-item { text-align: center; padding: 16px; background: #0a0d15; border-radius: 12px; }
+.stat-num { font-size: 32px; font-weight: 700; }
+.stat-lbl { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+.unit-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+.unit-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px 14px; cursor: pointer;
+  transition: all .15s; position: relative;
+}
+.unit-card:hover { border-color: var(--dim); transform: translateY(-2px); }
+.unit-num { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+.unit-prog { font-size: 20px; font-weight: 700; color: var(--accent); }
+.unit-bar { height: 4px; background: var(--border); border-radius: 99px; margin-top: 8px; overflow: hidden; }
+.unit-fill { height: 100%; background: linear-gradient(90deg, var(--lv3), var(--lv5)); transition: width .4s; }
+
+.special-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.special-btn {
+  background: var(--card); border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 20px 16px; cursor: pointer;
+  transition: all .15s; text-align: center;
+}
+.special-btn:hover { border-color: var(--accent); transform: translateY(-2px); }
+.special-icon { font-size: 32px; margin-bottom: 8px; }
+.special-name { font-size: 14px; font-weight: 700; }
+
+/* ═══ STUDY ═══ */
+#study-page { padding: 0; max-width: none; }
+#study-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border);
+  gap: 8px;
+}
+.mode-toggle {
+  display: flex;
+  background: #111827;
+  border-radius: 99px;
+  padding: 3px;
+  gap: 2px;
+}
+.mode-btn {
+  border: none; cursor: pointer; border-radius: 99px;
+  padding: 6px 14px; font-size: 13px; font-family: inherit;
+  font-weight: 700; transition: all .2s; color: var(--muted); background: none;
+}
+.mode-btn.active { background: var(--accent); color: #fff; }
+
+#study-progress { font-size: 13px; color: var(--dim); }
+#pbar-wrap { height: 3px; background: var(--border); }
+#pbar { height: 100%; background: var(--accent); transition: width .4s ease; }
+
+#study-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 20px;
+  position: relative;
+  min-height: 60vh;
+}
+#study-main.clickable { cursor: pointer; }
+
+#study-card {
+  width: 100%;
+  max-width: 480px;
+  min-height: 280px;
+  border-radius: 24px;
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 36px 28px;
+  gap: 16px;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,.6);
+  transition: border-color .3s;
+}
+#study-card.flipped {
+  border-color: #2a3f6a;
+  background: linear-gradient(145deg, #0e1420, #0a1628);
+}
+
+#card-phase { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); }
+#card-phrase {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 32px;
+  line-height: 1.3;
+  text-align: center;
+  color: var(--text);
+  min-height: 44px;
+}
+#card-phrase.small { font-size: 20px; color: var(--dim); }
+#card-meaning {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--accent);
+  text-align: center;
+  line-height: 1.4;
+  display: none;
+}
+#card-example {
+  display: none;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  width: 100%;
+}
+#card-example-en {
+  font-size: 13px;
+  color: var(--dim);
+  font-style: italic;
+  line-height: 1.6;
+  margin-bottom: 6px;
+}
+#card-example-ja {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.ex-speak-btn {
+  border: 1px solid var(--border); background: var(--card); color: var(--dim);
+  border-radius: 99px; cursor: pointer; padding: 5px 12px; font-size: 12px;
+  font-family: inherit; margin-top: 8px; transition: all .15s;
+}
+.ex-speak-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+#level-buttons {
+  display: none;
+  gap: 6px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.lv-btn {
+  border: 1.5px solid var(--border); background: var(--card);
+  border-radius: 8px; cursor: pointer; padding: 8px 12px;
+  font-size: 12px; font-family: inherit; transition: all .15s;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.lv-btn:hover { transform: translateY(-2px); }
+.lv-btn.lv1 { border-color: var(--lv1); color: var(--lv1); }
+.lv-btn.lv2 { border-color: var(--lv2); color: var(--lv2); }
+.lv-btn.lv3 { border-color: var(--lv3); color: var(--lv3); }
+.lv-btn.lv4 { border-color: var(--lv4); color: var(--lv4); }
+.lv-btn.lv5 { border-color: var(--lv5); color: var(--lv5); }
+.lv-btn.active { background: currentColor; color: #fff !important; }
+.lv-icon { font-size: 16px; }
+.lv-name { font-size: 10px; }
+
+#start-overlay {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.85);
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+#start-overlay.show { display: flex; }
+.start-btn {
+  background: var(--accent); border: none; color: #fff;
+  border-radius: 99px; cursor: pointer; padding: 16px 48px;
+  font-size: 18px; font-family: inherit; font-weight: 700;
+  transition: all .15s;
+}
+.start-btn:hover { transform: scale(1.05); }
+
+#pause-overlay {
+  display: none;
+  position: absolute;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  pointer-events: none;
+  color: #ffffff55;
+}
+#pause-overlay.show { display: flex; }
+
+#study-controls {
+  padding: 16px 20px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  max-width: 520px;
+  width: 100%;
+  margin: 0 auto;
+}
+.ctrl-btn {
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  border-radius: 99px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 12px 22px;
+  transition: all .15s;
+}
+.ctrl-btn:active { transform: scale(.95); }
+#ctrl-play {
+  flex: 1;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-size: 18px;
+  padding: 14px;
+}
+
+#speed-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 20px 12px;
+}
+.speed-btn {
+  border: 1px solid var(--border); background: none; color: var(--dim);
+  border-radius: 6px; cursor: pointer; padding: 4px 10px; font-size: 12px;
+  font-family: inherit; transition: all .15s;
+}
+.speed-btn.on { border-color: var(--accent); color: var(--accent); }
+#speed-label { font-size: 12px; color: var(--muted); }
+
+#audio-indicator {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  opacity: 0;
+  transition: opacity .2s;
+  margin-right: 8px;
+}
+#audio-indicator.on { opacity: 1; }
+
+/* ═══ QUIZ ═══ */
+.quiz-question {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 16px; padding: 28px 24px; margin-bottom: 20px;
+  text-align: center;
+}
+.quiz-phrase {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 28px;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+.quiz-prompt { font-size: 14px; color: var(--muted); }
+
+.quiz-options { display: flex; flex-direction: column; gap: 12px; }
+.quiz-opt {
+  background: var(--card); border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 16px 20px; cursor: pointer;
+  transition: all .15s; text-align: left; font-size: 15px;
+}
+.quiz-opt:hover { border-color: var(--dim); }
+.quiz-opt.correct { border-color: var(--green); background: #22c55e22; }
+.quiz-opt.wrong { border-color: var(--red); background: #ef444422; }
+.quiz-opt.disabled { cursor: default; opacity: .7; }
+
+.quiz-result {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 16px; padding: 20px; margin-top: 20px;
+  text-align: center; display: none;
+}
+.quiz-result.show { display: block; }
+.result-icon { font-size: 48px; margin-bottom: 12px; }
+.result-text { font-size: 16px; margin-bottom: 16px; }
+
+/* ═══ STATS ═══ */
+.chart-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 16px; padding: 20px; margin-bottom: 16px;
+}
+.chart-title { font-size: 14px; color: var(--muted); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1px; }
+.level-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.level-bar-label { width: 80px; font-size: 13px; display: flex; align-items: center; gap: 4px; }
+.level-bar-fill {
+  flex: 1;
+  height: 24px;
+  background: var(--border);
+  border-radius: 99px;
+  overflow: hidden;
+  position: relative;
+}
+.level-bar-inner {
+  height: 100%;
+  border-radius: 99px;
+  transition: width .5s ease;
+}
+.level-bar-count {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.btn-primary {
+  background: var(--accent); border: none; color: #fff;
+  border-radius: 99px; cursor: pointer; padding: 12px 24px;
+  font-size: 15px; font-family: inherit; font-weight: 700;
+  transition: all .15s; display: block; width: 100%;
+}
+.btn-primary:hover { transform: translateY(-2px); }
+
+/* ═══ ANIMATIONS ═══ */
+@keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+.fade-in { animation: fadeUp .25s ease; }
 </style>
 </head>
 <body>
 
-<div class="container">
-  <header>
-    <h1>Learning <span>Suite</span></h1>
-    <div id="p-badge" style="font-size: 12px; color: var(--sub); font-weight: 700;"></div>
-  </header>
+<header>
+  <div class="logo">📚 熟語マスター Pro</div>
+  <button class="nav-btn" id="nav-btn" onclick="navBack()">← ホーム</button>
+</header>
 
-  <nav class="nav-scroll">
-    <button class="ntab active" onclick="setMode('home')">🏠 ホーム</button>
-    <button class="ntab" onclick="setMode('phrasal')">📖 句動詞</button>
-    <button class="ntab" onclick="setMode('writing')">📝 英検要約</button>
-    <button class="ntab" onclick="setMode('chinese')">🇨🇳 中国語</button>
-    <button class="ntab" onclick="setMode('sanskrit')">🪷 サンスクリット</button>
-  </nav>
+<!-- ════════════ HOME ════════════ -->
+<div class="page active" id="page-home">
+  <div class="stat-card">
+    <div class="stat-title">総合進捗</div>
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:12px">
+      <div class="stat-big" id="home-master-pct">0%</div>
+      <div style="font-size:14px;color:var(--muted)" id="home-master-count">0 / 380</div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-item">
+        <div class="stat-num" style="color:var(--green)" id="home-streak">0</div>
+        <div class="stat-lbl">🔥 連続日数</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" style="color:var(--accent)" id="home-time">0</div>
+        <div class="stat-lbl">⏱️ 今日の学習（分）</div>
+      </div>
+    </div>
+  </div>
 
-  <div id="content"></div>
+  <div class="stat-card">
+    <div class="stat-title">ユニット選択</div>
+    <div class="unit-grid" id="unit-grid"></div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-title">特別モード</div>
+    <div class="special-grid">
+      <div class="special-btn" onclick="startSpecial('weak')">
+        <div class="special-icon">🎯</div>
+        <div class="special-name">弱点集中</div>
+      </div>
+      <div class="special-btn" onclick="startSpecial('daily')">
+        <div class="special-icon">☀️</div>
+        <div class="special-name">今日の20語</div>
+      </div>
+      <div class="special-btn" onclick="startSpecial('quiz')">
+        <div class="special-icon">❓</div>
+        <div class="special-name">クイズ</div>
+      </div>
+      <div class="special-btn" onclick="showPage('stats')">
+        <div class="special-icon">📊</div>
+        <div class="special-name">統計</div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<div id="toast"></div>
+<!-- ════════════ STUDY ════════════ -->
+<div class="page" id="page-study">
+  <div id="study-topbar">
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="btn-auto" onclick="setMode('auto')">自動</button>
+      <button class="mode-btn" id="btn-manual" onclick="setMode('manual')">手動</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div id="audio-indicator"></div>
+      <span id="study-progress">1 / 19</span>
+    </div>
+  </div>
+  <div id="pbar-wrap"><div id="pbar" style="width:0%"></div></div>
+
+  <div id="study-main">
+    <div id="study-card">
+      <div id="card-phase">PHRASAL VERB</div>
+      <div id="card-phrase">—</div>
+      <div id="card-meaning">—</div>
+      <div id="card-example">
+        <div id="card-example-en"></div>
+        <div id="card-example-ja"></div>
+        <button class="ex-speak-btn" onclick="speakExample()">📖 例文を読む</button>
+      </div>
+      <div id="level-buttons">
+        <button class="lv-btn lv1" onclick="setLevel(1)"><span class="lv-icon">🌱</span><span class="lv-name">はじめまして</span></button>
+        <button class="lv-btn lv2" onclick="setLevel(2)"><span class="lv-icon">🌿</span><span class="lv-name">なんとなく</span></button>
+        <button class="lv-btn lv3" onclick="setLevel(3)"><span class="lv-icon">🌳</span><span class="lv-name">だいたいOK</span></button>
+        <button class="lv-btn lv4" onclick="setLevel(4)"><span class="lv-icon">⭐</span><span class="lv-name">自信あり</span></button>
+        <button class="lv-btn lv5" onclick="setLevel(5)"><span class="lv-icon">🏆</span><span class="lv-name">マスター</span></button>
+      </div>
+    </div>
+    <div id="tap-hint" style="margin-top:12px;font-size:12px;color:var(--muted)">タップで一時停止</div>
+    <div id="start-overlay">
+      <button class="start-btn" onclick="startAuto()">▶ スタート</button>
+    </div>
+    <div id="pause-overlay">⏸</div>
+  </div>
+
+  <div id="speed-row">
+    <span id="speed-label">速度：</span>
+    <button class="speed-btn" onclick="setSpeed(0)">遅め</button>
+    <button class="speed-btn on" onclick="setSpeed(1)">普通</button>
+    <button class="speed-btn" onclick="setSpeed(2)">速め</button>
+  </div>
+
+  <div id="study-controls">
+    <button class="ctrl-btn" onclick="goPrev()">◀</button>
+    <button class="ctrl-btn" id="ctrl-play" onclick="togglePlay()">⏸</button>
+    <button class="ctrl-btn" onclick="goNext()">▶</button>
+  </div>
+</div>
+
+<!-- ════════════ QUIZ ════════════ -->
+<div class="page" id="page-quiz">
+  <div class="quiz-question">
+    <div class="quiz-phrase" id="quiz-phrase">—</div>
+    <div class="quiz-prompt">この意味は？</div>
+  </div>
+  <div class="quiz-options" id="quiz-options"></div>
+  <div class="quiz-result" id="quiz-result">
+    <div class="result-icon" id="result-icon"></div>
+    <div class="result-text" id="result-text"></div>
+    <button class="btn-primary" onclick="nextQuiz()">次へ</button>
+  </div>
+</div>
+
+<!-- ════════════ STATS ════════════ -->
+<div class="page" id="page-stats">
+  <div class="chart-card">
+    <div class="chart-title">レベル別分布</div>
+    <div id="level-chart"></div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title">学習記録</div>
+    <div style="display:flex;gap:20px;justify-content:space-around">
+      <div style="text-align:center">
+        <div style="font-size:36px;font-weight:700;color:var(--green)" id="stats-streak">0</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px">🔥 連続日数</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:36px;font-weight:700;color:var(--accent)" id="stats-time">0</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px">⏱️ 今日の学習（分）</div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
-// --- Data ---
-const PHRASAL_VERBS = [
-  {id:1, phrase:"abide by ~", def:"〜に従う、〜を守る", en:"In technical interpreting, you must abide by the safety protocols of the factory.", ja:"技術通訳では、工場の安全プロトコルに従わなければなりません。"},
-  {id:2, phrase:"bear out", def:"裏付ける", en:"The data from the industrial machinery bore out our initial efficiency projections.", ja:"産業機械のデータが、我々の最初の効率予測を裏付けた。"},
-  // ...（ここに以前の380語を統合可能。サンプルとして2つ配置）
+// ════════════════════════════════════════
+// DATA — 380 words split into 20 units
+// ════════════════════════════════════════
+const ALL_WORDS = [
+  ["abide by ~","〜に従う、〜を守る","You must abide by the rules of the competition.","大会のルールに従わなければなりません。"],
+  ["act up","不調になる、わがままを言う","My car has been acting up again — it won't start in the morning.","また車の調子が悪い。朝エンジンがかからない。"],
+  ["atone for ~","〜を償う","He volunteered at the shelter to atone for his past mistakes.","彼は過去の過ちを償うために施設でボランティアをした。"],
+  ["back down","折れる、引き下がる","Despite the pressure, she refused to back down from her opinion.","プレッシャーにもかかわらず、彼女は自分の意見を引っ込めることを拒んだ。"],
+  ["back out","手を引く、撤退する","He backed out of the deal at the last minute, leaving everyone frustrated.","彼は土壇場で取引から手を引き、全員を困惑させた。"],
+  ["bail out","救済する","The government decided to bail out the failing airline.","政府は経営難の航空会社を救済することにした。"],
+  ["bank on ~","〜を当てにする","Don't bank on getting a raise this year — the budget is tight.","今年昇給があると当てにしないで。予算が厳しいから。"],
+  ["bargain for ~","予期する","I got more than I bargained for when I accepted this project.","このプロジェクトを引き受けたとき、予想以上のことが起きた。"],
+  ["bargain on ~","〜と思う","We hadn't bargained on the weather turning this bad.","天気がこんなに悪くなるとは思っていなかった。"],
+  ["barge in","押し入る、割り込む","Please knock before entering — don't just barge in!","入る前にノックしてください。いきなり押し入らないで！"],
+  ["barge into ~","〜に押し入る","She barged into the office without knocking and startled everyone.","彼女はノックもせず事務所に押し入り、全員を驚かせた。"],
+  ["barge through ~","押しのけて進む","He barged through the crowd to reach the front of the line.","彼は列の前に行くために群衆を押しのけて進んだ。"],
+  ["bawl out","怒鳴りつける","The coach bawled out the players for missing practice.","コーチは練習を欠席した選手たちを怒鳴りつけた。"],
+  ["be put upon","利用される","She felt she was always being put upon by her colleagues.","彼女はいつも同僚に利用されていると感じていた。"],
+  ["be roped into ~","〜に引き込まれる","I was roped into giving a speech at the company dinner.","会社の夕食会でスピーチをするよう引き込まれた。"],
+  ["bear down on ~","〜に迫る、圧力をかける","The project deadline is bearing down on us fast.","プロジェクトの締め切りが急速に迫ってきている。"],
+  ["bear out","裏付ける","The test results bore out our initial hypothesis.","テスト結果が最初の仮説を裏付けた。"],
+  ["beat up","殴る","He was beaten up by a group of strangers on his way home.","帰り道に見知らぬ人たちのグループに殴られた。"],
+  ["beef up","強化する","The company beefed up its cybersecurity after the data breach.","データ漏洩の後、会社はサイバーセキュリティを強化した。"],
+  ["belt out","熱唱する","She belted out the national anthem with incredible power.","彼女は国歌を驚くべき迫力で熱唱した。"],
+  ["blare out","鳴り響く","Music blared out from the apartment upstairs all night long.","一晩中、上のアパートから音楽が鳴り響いた。"],
+  ["blot out","覆い隠す","Thick storm clouds blotted out the sun completely.","分厚い嵐の雲が太陽を完全に覆い隠した。"],
+  ["blow away","吹き飛ばす、驚嘆させる","The autumn wind blew away all the leaves from the garden.","秋風が庭の葉を全て吹き飛ばした。"],
+  ["blow up","爆発する、拡大する","The story blew up on social media overnight.","その話はソーシャルメディアで一夜にして拡散した。"],
+  ["blurt out","思わず口にする","He blurted out the surprise before she could stop him.","彼女が止める前に、彼はサプライズを思わず口にしてしまった。"],
+  ["bog down","行き詰まる","The negotiations got bogged down in endless paperwork.","交渉は終わりのない書類作業に行き詰まった。"],
+  ["boil down to ~","〜に行き着く","All our differences boil down to one simple misunderstanding.","私たちの意見の違いは全て一つの単純な誤解に行き着く。"],
+  ["boil over","沸きこぼれる、激怒する","Tensions boiled over during the heated board meeting.","白熱した取締役会の間に緊張が沸点に達した。"],
+  ["boot out","追い出す","He was booted out of the restaurant for causing a scene.","彼は騒ぎを起こしてレストランから追い出された。"],
+  ["boot up","（PCを）起動する","It takes a while for this old computer to boot up.","この古いコンピューターが起動するには少し時間がかかる。"],
+  ["bottle up","感情を溜め込む","Bottling up your emotions is never a healthy solution.","感情を内に溜め込むことは決して健全な解決策ではない。"],
+  ["bottom out","底を打つ","The housing market appears to have finally bottomed out.","住宅市場はついに底を打ったようだ。"],
+  ["bow out","身を引く、引退する","After twenty years, she decided to bow out gracefully.","20年後、彼女は潔く引退することを決めた。"],
+  ["bowl over","驚かせる、圧倒する","We were completely bowled over by her stunning performance.","私たちは彼女の素晴らしいパフォーマンスに完全に圧倒された。"],
+  ["box up","箱に詰める","She spent the weekend boxing up her belongings for the move.","彼女は引っ越しのために週末を持ち物を箱に詰めて過ごした。"],
+  ["branch out","進出する、拡大する","The small bakery branched out into catering for events.","小さなパン屋はイベントのケータリング事業に進出した。"],
+  ["break down","故障する、崩壊する","The car broke down on the motorway in the pouring rain.","土砂降りの中、車が高速道路で故障した。"],
+  ["break out","発生する、脱走する","A fire broke out in the warehouse late last night.","昨晩遅く、倉庫で火災が発生した。"],
+  ["breeze in","軽やかに入ってくる","She breezed in twenty minutes late as if nothing had happened.","彼女は何事もなかったかのように20分遅れて軽やかに入ってきた。"],
+  ["brim over","あふれる","The little girl's eyes brimmed over with happy tears.","少女の目に嬉し涙があふれた。"],
+  ["bring up","提起する、育てる","He brought up several important points during the discussion.","彼は議論の中でいくつかの重要な点を提起した。"],
+  ["bubble over","弾けんばかりに喜ぶ","The students bubbled over with excitement before the trip.","旅行前に生徒たちは興奮で弾けんばかりだった。"],
+  ["buckle down","本腰を入れる","It's time to buckle down and prepare for the final exam.","本腰を入れて期末試験の準備をする時だ。"],
+  ["bunch together","身を寄せ合う","They bunched together in the shelter to keep warm.","彼らは暖を取るためにシェルターに身を寄せ合った。"],
+  ["bunch up","固まる、たまる","The carpet keeps bunching up in the corner of the room.","カーペットが部屋の隅でよれてしまう。"],
+  ["bundle up","厚着をする","Bundle up before going outside — it's snowing!","外に出る前に厚着をして。雪が降っているよ！"],
+  ["butt in","口を挟む","I hate it when he butts in on other people's conversations.","彼が他の人の会話に割り込むのが嫌だ。"],
+  ["butter up","お世辞を言う","She was clearly buttering up the manager before the reviews.","彼女は明らかに評価の前にマネージャーにお世辞を言っていた。"],
+  ["buy off","買収する","The company tried to buy off the whistleblower with a settlement.","会社は示談金で内部告発者を買収しようとした。"],
+  ["by chance","偶然に","We met by chance on the platform and ended up on the same train.","ホームでばったり会って、同じ電車に乗ることになった。"],
+  ["call up","電話する、召集する","She called up her old professor to ask for a recommendation.","彼女は推薦状を依頼するために元教授に電話した。"],
+  ["carry out","実行する","The surgeons carried out the complex operation successfully.","外科医たちは複雑な手術を無事に行った。"],
+  ["carve up","分割する","The territory was carved up between the two rival factions.","領土は二つの対立派閥の間で分け合われた。"],
+  ["cash in on ~","〜を利用して儲ける","Several companies are cashing in on the fitness trend.","いくつかの会社がフィットネスブームを利用して儲けている。"],
+  ["cast off","取り除く、出航する","The boat cast off from the harbor at dawn.","ボートは夜明けに港から離れた。"],
+  ["cater to ~","〜に応える","This hotel caters to business travelers with a 24-hour gym.","このホテルは24時間ジムでビジネス旅行者向けにサービスを提供している。"],
+  ["cave in","崩れる、屈服する","The company finally caved in to consumer pressure.","会社はついに消費者の圧力に屈した。"],
+  ["chase up","催促する","Can you chase up the invoice? We've been waiting three weeks.","請求書を催促してもらえる？もう3週間待っているんです。"],
+  ["chew out","叱りつける","The director chewed out the whole team over the missed deadline.","ディレクターは締め切りを守れなかったことでチーム全員を叱りつけた。"],
+  ["chime in","口を添える","'I think that's a great idea,' he chimed in enthusiastically.","「それは素晴らしいアイデアだと思います」と彼は熱心に口を添えた。"],
+  ["chip away at ~","少しずつ侵食する","Rising costs are chipping away at the company's profits.","上昇するコストが会社の利益を少しずつ侵食している。"],
+  ["chip in","お金を出し合う","All the neighbours chipped in to buy a gift for the couple.","近所の人たちが全員お金を出し合ってカップルへのプレゼントを買った。"],
+  ["chip off","剥がれ落ちる","A piece of the old plaster chipped off the wall.","壁の古い漆喰が一片剥がれ落ちた。"],
+  ["choke back","（感情を）こらえる","She choked back tears as she read the farewell letter.","彼女は別れの手紙を読みながら涙をこらえた。"],
+  ["choke off","断ち切る","The sanctions choked off the country's access to foreign currency.","制裁が外貨へのアクセスを断ち切った。"],
+  ["choke up","声が詰まる","He choked up during his wedding speech and couldn't continue.","彼は結婚式のスピーチ中に声が詰まって続けられなかった。"],
+  ["chop off","切り落とす","He accidentally chopped off the tip of his finger while cooking.","料理中に誤って指の先を切り落としてしまった。"],
+  ["churn out","次々と作る","The printer churns out hundreds of copies per minute.","そのプリンターは毎分数百枚を印刷する。"],
+  ["clam up","口を閉ざす","The suspect clammed up the moment a lawyer was mentioned.","容疑者は弁護士の話が出た瞬間に口を閉ざした。"],
+  ["clamp down on ~","厳しく取り締まる","The school clamped down on mobile phone use in class.","学校は授業中の携帯電話の使用を厳しく規制した。"],
+  ["claw back","取り戻す","The team clawed back a two-goal deficit to win in extra time.","チームは2点のビハインドを取り戻して延長戦で勝利した。"],
+  ["clog up","詰まる","The drain keeps clogging up with soap and hair.","排水口が石鹸と髪の毛で詰まり続ける。"],
+  ["coast along","のらりくらりとやる","He's been coasting along at work without really trying.","彼は本当に努力せず仕事をのらりくらりとこなしている。"],
+  ["come around","同意するようになる","It took a while, but he came around to her point of view.","時間はかかったが、彼はついに彼女の見方に納得した。"],
+  ["come by ~","手に入れる","A good mechanic is hard to come by in this area.","この地域では腕の良いメカニックを見つけるのが難しい。"],
+  ["come down on ~","厳しく罰する","The government came down hard on tax cheats.","政府は脱税者を厳しく罰した。"],
+  ["come in for ~","（批判など）を受ける","The new traffic plan came in for heavy criticism from residents.","新しい交通計画は住民から激しい批判を受けた。"],
+  ["coop up","閉じ込める","Being cooped up indoors all week made the dog restless.","一週間ずっと室内に閉じ込められて、犬は落ち着かなくなった。"],
+  ["cop out","逃げる、責任を回避する","He copped out of cleaning duty by pretending to be sick.","彼は病気のふりをして掃除当番から逃げた。"],
+  ["crack down on ~","厳しく取り締まる","The city cracked down on illegal dumping with heavy fines.","市は重い罰金で不法投棄を厳しく取り締まった。"],
+  ["crack up","大笑いする","The entire audience cracked up at the comedian's final joke.","コメディアンの最後のジョークに観客全員が大笑いした。"],
+  ["crank out","次々と作り出す","She cranked out four articles before lunch.","彼女は昼食前に4本の記事を次々と書き上げた。"],
+  ["creep in","忍び込む","Doubts began to creep in as the deadline approached.","締め切りが近づくにつれて疑念が忍び込み始めた。"],
+  ["crop up","突然現れる","A few technical problems cropped up during the installation.","インストール中にいくつかの技術的な問題が突然現れた。"],
+  ["crouch down","しゃがむ","The cat crouched down before pouncing on the toy.","猫はおもちゃに飛びかかる前にしゃがみ込んだ。"],
+  ["dabble in","少しかじる","She dabbles in watercolor painting on weekends.","彼女は週末に水彩画を少しかじっている。"],
+  ["dash off","さっと書く","He dashed off a thank-you note before catching his flight.","彼はフライトに乗る前にお礼の手紙をさっと書いた。"],
+  ["dawn on ~","〜に気づく","It slowly dawned on her that she'd been lied to.","彼女は嘘をつかれていたとゆっくり気がついた。"],
+  ["deal out","配る","The cards were carefully dealt out to each player.","各プレイヤーにカードが丁寧に配られた。"],
+  ["deck out","飾る","The whole town was decked out in lights for the festival.","お祭りのために街全体がイルミネーションで飾られた。"],
+  ["descend on ~","押しかける","Thousands of tourists descended on the small island every summer.","毎夏、何千人もの観光客がその小さな島に押し寄せる。"],
+  ["dig into ~","掘り下げる","The journalist began to dig into the company's financial records.","ジャーナリストは会社の財務記録を掘り下げ始めた。"],
+  ["dig up","掘り起こす","Workers dug up an old Roman road while laying new pipes.","作業員たちは新しいパイプを敷く際に古いローマ時代の道を掘り起こした。"],
+  ["dip into ~","取り崩す","We had to dip into our emergency fund to pay for the repairs.","修理代を払うために緊急資金を取り崩さなければならなかった。"],
+  ["dish out","気軽に与える","He dishes out advice to anyone who will listen.","彼は話を聞いてくれる人なら誰にでも気軽にアドバイスを与える。"],
+  ["dispense with ~","〜を省く","Let's dispense with the formalities and get down to business.","形式ばった手続きは省いて本題に入りましょう。"],
+  ["dispose of ~","処分する","Please dispose of the chemical waste in the designated container.","化学廃棄物は指定された容器に処分してください。"],
+  ["do away with ~","廃止する","The new system does away with the need for paper forms.","新しいシステムは紙の用紙の必要性をなくす。"],
+  ["do up","改装する","She did up the old farmhouse into a beautiful guest house.","彼女は古い農家を美しいゲストハウスに改装した。"],
+  ["do without ~","〜なしで済ます","We'll have to do without air conditioning this summer.","今年の夏はエアコンなしで過ごさなければならない。"],
+  ["dole out","少しずつ配る","Aid was slowly doled out to the affected families.","被災した家族に支援が少しずつ配給された。"],
+  ["dote on ~","溺愛する","He absolutely dotes on his new grandchild.","彼は新しい孫を溺愛している。"],
+  ["drag on","長引く","The court case dragged on for over three years.","裁判は3年以上も長引いた。"],
+  ["drag out","引き延ばす","Stop dragging out the decision — just tell us your answer.","決断を引き延ばすのをやめて、答えを教えてください。"],
+  ["draw on ~","活かす","She drew on her years of teaching experience to handle the crisis.","彼女は危機に対処するために長年の教育経験を活かした。"],
+  ["drift off","眠りに落ちる","He drifted off to sleep halfway through the film.","彼は映画の途中で眠りに落ちた。"],
+  ["drive away","遠ざける","Their poor service drove away many loyal customers.","劣悪なサービスが多くの常連客を遠ざけた。"],
+  ["drone on","単調に話し続ける","The speaker droned on about statistics for nearly an hour.","発言者は約一時間も統計について単調に話し続けた。"],
+  ["drown out","かき消す","The applause drowned out the rest of his speech.","拍手が彼のスピーチの残りをかき消した。"],
+  ["drum up","集める","The marketing team worked hard to drum up interest in the launch.","マーケティングチームは発売への関心を集めるために懸命に取り組んだ。"],
+  ["duck out","抜け出す","He ducked out of the reception early to catch his train.","電車に乗るために彼は早めにパーティーを抜け出した。"],
+  ["dumb down","わかりやすくする","The publishers asked her to dumb down the textbook for younger readers.","出版社は若い読者向けに教科書をわかりやすくするよう彼女に求めた。"],
+  ["dwell on ~","引きずる、くよくよする","There's no point dwelling on the past — focus on the future.","過去を引きずっても意味がない。未来に集中しなさい。"],
+  ["ease off","和らぐ","The heavy rain finally eased off around midnight.","激しい雨がついに真夜中頃に和らいだ。"],
+  ["ease up","緩める","Please ease up on the pressure — the team is doing its best.","プレッシャーを緩めてください。チームは最善を尽くしています。"],
+  ["egg on","けしかける","His older brother egged him on to try the spicy challenge.","兄が彼をけしかけてスパイシーな挑戦をさせようとした。"],
+  ["eke out","なんとかやりくりする","They eked out a modest living from their small farm.","彼らは小さな農場でつつましい生活をなんとか送った。"],
+  ["entice A to do","〜するよう誘う","The shop enticed shoppers to come in with free samples.","店は無料サンプルで買い物客を引き込んだ。"],
+  ["factor in","考慮に入れる","Don't forget to factor in the cost of accommodation.","宿泊費を計算に入れることを忘れずに。"],
+  ["fade away","消えていく","The music slowly faded away as the car drove into the distance.","車が遠ざかるにつれて音楽はゆっくりと消えていった。"],
+  ["fall back on ~","〜に頼る","When things go wrong, she can always fall back on her teaching skills.","物事が上手くいかないとき、彼女はいつでも教えるスキルに頼ることができる。"],
+  ["fall in with ~","〜と付き合うようになる","He fell in with the wrong crowd during his college years.","彼は大学時代に悪い仲間と付き合うようになった。"],
+  ["fall out with ~","〜と仲違いする","She fell out with her business partner over the direction of the company.","彼女は会社の方向性をめぐって事業パートナーと仲違いした。"],
+  ["fall through","失敗に終わる","The merger fell through when the banks refused to provide financing.","銀行が融資を断ったため、合併は失敗に終わった。"],
+  ["fan out","散らばる","The volunteers fanned out across the park to collect litter.","ボランティアたちはゴミを拾うために公園全体に散らばった。"],
+  ["farm out","外注する","The studio farms out its visual effects work to smaller companies.","そのスタジオは視覚効果の仕事を小さな会社に外注している。"],
+  ["fawn over ~","へつらう","The reporters fawned over the famous actress at the premiere.","試写会でレポーターたちは有名女優にへつらっていた。"],
+  ["fend for oneself","自力でやっていく","After leaving the family business, he had to fend for himself.","家業を離れた後、彼は自力で生きていかなければならなかった。"],
+  ["fend off","撃退する","The goalkeeper managed to fend off several powerful shots.","ゴールキーパーはいくつかの強力なシュートをなんとか防いだ。"],
+  ["filter out","除去する","The new air purifier filters out harmful particles effectively.","新しい空気清浄機は有害な粒子を効果的に除去する。"],
+  ["fire away","どうぞ（遠慮なく）","'I have a few questions.' 'Sure, fire away!'","「いくつか質問があります」「もちろん、どうぞ！」"],
+  ["fix on ~","決める","She finally fixed on a date for the wedding.","彼女はついに結婚式の日程を決めた。"],
+  ["fizzle out","しぼむ、立ち消えになる","The campaign fizzled out after losing its main sponsor.","主要スポンサーを失い、キャンペーンはしぼんでしまった。"],
+  ["flare up","悪化する、再燃する","His arthritis flares up whenever the weather turns cold.","寒くなると彼の関節炎が悪化する。"],
+  ["flesh out","肉付けする","The proposal needs to be fleshed out with more specific data.","提案はより具体的なデータで肉付けする必要がある。"],
+  ["flick through ~","ぱらぱらとめくる","He flicked through the manual but couldn't find the answer.","彼はマニュアルをぱらぱらとめくったが、答えが見つからなかった。"],
+  ["flip out","激怒する","She completely flipped out when she saw the mess in the kitchen.","彼女はキッチンの散らかり具合を見て完全に激怒した。"],
+  ["float around","あちこちで語られる","An idea for a new novel has been floating around in my head.","新しい小説のアイデアが頭の中を浮かんでいる。"],
+  ["flunk out","落第して退学になる","He flunked out of medical school after failing key exams.","重要な試験に落ちて、彼は医大を退学になった。"],
+  ["fly at ~","飛びかかる","The dog flew at the intruder who had entered the garden.","犬は庭に入ってきた侵入者に飛びかかった。"],
+  ["follow through on ~","最後までやり遂げる","He made promises but rarely followed through on them.","彼は約束したが、ほとんど実行しなかった。"],
+  ["force out","追い出す","The rising rent is forcing many independent shops out of the area.","家賃の上昇が多くの個人経営の店をその地域から追い出している。"],
+  ["fork out","渋々払う","We had to fork out a lot of money for the plumbing repairs.","配管修理のために多くのお金を出さなければならなかった。"],
+  ["foul up","しくじる","He fouled up the whole plan by arriving two hours late.","2時間も遅刻して、彼は計画全体をめちゃくちゃにした。"],
+  ["fritter away","無駄遣いする","Don't fritter away your savings on things you don't need.","必要のないものに貯金を無駄遣いしないで。"],
+  ["frown on ~","快く思わない","The management frowns on casual dress in client meetings.","経営陣はクライアントとの会議でのカジュアルな服装を快く思わない。"],
+  ["fuss over","やたらと世話を焼く","Grandma always fusses over us whenever we visit.","訪ねるたびにおばあちゃんはいつも私たちにやたらと世話を焼く。"],
+  ["gain on ~","追いつく","The second runner is gaining on the leader fast.","2番目のランナーがリーダーに急速に追いついている。"],
+  ["gang up on ~","集団でいじめる","The children ganged up on the new kid at recess.","子どもたちは休み時間に新しい子に集団でいじわるをした。"],
+  ["gear up","準備する","The factory is gearing up for its busiest production season.","工場は最も忙しい生産シーズンに向けて準備を進めている。"],
+  ["get away with ~","バレずに済む","He got away with parking illegally for months.","彼は数ヶ月間、違法駐車がバレなかった。"],
+  ["get back at ~","仕返しする","She wanted to get back at him for revealing her secret.","彼女は秘密を暴かれたことで彼に仕返ししたかった。"],
+  ["get down to ~","本腰を入れる","Enough small talk — let's get down to business.","雑談はもう十分です。本題に入りましょう。"],
+  ["get in on ~","参加する","She managed to get in on the ground floor of the investment.","彼女はその投資に早い段階で参加することができた。"],
+  ["give in","折れる、屈服する","After hours of debate, he finally gave in and accepted the deal.","何時間もの議論の末、彼はついに折れて取引を受け入れた。"],
+  ["give up","諦める","Never give up on your dreams, no matter how hard things get.","どんなに辛くても、夢を諦めないでください。"],
+  ["glance off","かすめる","The pebble glanced off the windscreen and left a crack.","小石がフロントガラスに当たって割れ目が残った。"],
+  ["gloss over ~","さらっと流す","The report glossed over the project's many failures.","レポートはプロジェクトの多くの失敗をさらっと流した。"],
+  ["go through with ~","決行する","Despite her nerves, she went through with the surgery.","緊張したが、彼女は手術を決行した。"],
+  ["goof off","ふざける","Stop goofing off and finish the report before noon.","ふざけるのをやめて午前中にレポートを仕上げなさい。"],
+  ["grate on ~","神経に障る","His constant sighing really grates on my nerves.","彼の絶え間ないため息が本当に神経に障る。"],
+  ["grow on ~","好きになってくる","The new neighborhood grew on her after a few months.","数ヶ月後、その新しい近所が彼女に馴染んできた。"],
+  ["hail from ~","〜の出身である","He hails from a small fishing village on the east coast.","彼は東海岸の小さな漁村の出身だ。"],
+  ["hand down","受け継がせる","The old clock was handed down through four generations.","その古い時計は4世代にわたって受け継がれてきた。"],
+  ["hang back","躊躇する","He hung back while his friends rushed toward the crowd.","友達が群衆に向かって急ぐ中、彼は躊躇していた。"],
+  ["harp on","くどくど言い続ける","She keeps harping on about the noise from the neighbours.","彼女は近所の騒音についてくどくど言い続ける。"],
+  ["head off","防ぐ、食い止める","The negotiators managed to head off a potential strike.","交渉担当者はなんとかストライキの可能性を回避した。"],
+  ["head up","率いる","She was asked to head up the newly formed research division.","彼女は新しく設立された研究部門を率いるよう求められた。"],
+  ["hem in","囲む、閉じ込める","The small apartment hemmed them in during the long lockdown.","長いロックダウン中、狭いアパートが彼らを閉じ込めた。"],
+  ["hike up","値上げする","The electricity company hiked up prices by fifteen percent.","電力会社は価格を15%値上げした。"],
+  ["hinge on ~","〜にかかっている","The whole deal hinges on whether the bank approves the loan.","取引全体が銀行がローンを承認するかどうかにかかっている。"],
+  ["hold back","こらえる、引き留める","He held back his anger and responded calmly.","彼は怒りをこらえて冷静に応えた。"],
+  ["hold down","抑える、掛け持ちする","She held down three jobs while studying for her degree.","彼女は学位のために勉強しながら3つの仕事を掛け持ちした。"],
+  ["hold off","延期する","Let's hold off on the announcement until we have all the facts.","全ての事実が揃うまで発表を延期しましょう。"],
+  ["hold out for ~","求めて粘る","The sellers are holding out for a higher price.","売り手はより高い値段を求めて粘っている。"],
+  ["hole up","篭もる","They holed up in a mountain hut until the blizzard passed.","吹雪が過ぎ去るまで彼らは山小屋に篭もった。"],
+  ["horse around","ふざける","Stop horsing around in the classroom!","教室でふざけるのをやめなさい！"],
+  ["hunger for ~","渇望する","She hungers for recognition after years of working behind the scenes.","長年陰で働いた後、彼女は認められることを渇望している。"],
+  ["hunker down","頑張る、備える","The team hunkered down and worked through the holiday weekend.","チームは身を低くして連休の週末も仕事を続けた。"],
+  ["in the end","結局","In the end, honesty is always the best policy.","結局、誠実さが常に最善の策だ。"],
+  ["iron out","解消する、解決する","They spent the morning ironing out the details of the contract.","彼らは午前中を契約の詳細を解決することに費やした。"],
+  ["jockey for ~","争う","Three candidates are jockeying for the leadership position.","3人の候補者がリーダーの地位を争っている。"],
+  ["jot down","メモする","Jot down the key points so you don't forget them.","忘れないうちに重要なポイントをメモしておきなさい。"],
+  ["jump at ~","飛びつく","She jumped at the chance to study abroad in France.","彼女はフランスへの留学チャンスに飛びついた。"],
+  ["keel over","ぶっ倒れる","Several runners keeled over in the extreme heat.","猛暑の中、何人かのランナーがぶっ倒れた。"],
+  ["keep after ~","何度も催促する","His coach kept after him until he perfected his form.","コーチはフォームが完璧になるまで彼に何度も言い続けた。"],
+  ["keep back","引き止める","Barriers were put up to keep back the crowd.","群衆を引き止めるためにバリケードが設置された。"],
+  ["key up","緊張させる","She was all keyed up before walking onto the stage.","ステージに出る前に彼女は非常に緊張していた。"],
+  ["kick around","ざっと話し合う","Let's kick around a few ideas before making any decisions.","何かを決める前にいくつかのアイデアについてざっと話し合いましょう。"],
+  ["kick in","発効する、効き始める","The painkillers should kick in within thirty minutes.","鎮痛剤は30分以内に効き始めるはずだ。"],
+  ["kick off","始まる、開始する","The conference kicks off on Monday with a keynote speech.","会議は月曜日の基調演説で始まる。"],
+  ["kick up","大騒ぎする","The children kicked up a huge fuss about going to bed early.","子どもたちは早く寝ることについて大騒ぎした。"],
+  ["knuckle down","本腰を入れる","You need to knuckle down if you want to pass this exam.","この試験に合格したいなら本腰を入れて取り組まなければならない。"],
+  ["knuckle under","屈服する","She refused to knuckle under to their unreasonable demands.","彼女は彼らの不合理な要求に屈することを拒んだ。"],
+  ["lag behind ~","遅れる","The region still lags behind the national average in income.","この地域はまだ収入において全国平均を下回っている。"],
+  ["lap up","喜んで受け入れる","The audience lapped up every word of his inspiring speech.","観衆は彼の感動的なスピーチの言葉を全て喜んで受け入れた。"],
+  ["lash out","感情的に当たる","He lashed out at his coworkers when he was under stress.","彼はストレスを感じているとき同僚に感情的に当たった。"],
+  ["lay down","置く、制定する","The soldiers were ordered to lay down their weapons.","兵士たちは武器を置くよう命令された。"],
+  ["lay into ~","批判する","The critic laid into the film with brutal honesty.","批評家は映画を容赦ない正直さで酷評した。"],
+  ["lay out","説明する、並べる","She carefully laid out all the options before making her choice.","彼女は選択をする前に全ての選択肢を丁寧に説明した。"],
+  ["lead up to ~","〜につながる","What events led up to the French Revolution?","どのような出来事がフランス革命につながったのですか？"],
+  ["leaf through ~","ぱらぱらとめくる","She leafed through the photo album, smiling at the memories.","彼女は思い出に微笑みながらフォトアルバムをぱらぱらとめくった。"],
+  ["lean on ~","頼る","He leaned heavily on his friends during the difficult divorce.","つらい離婚の間、彼は友人たちに大きく頼った。"],
+  ["leap at ~","飛びつく","He leapt at the opportunity to work for such a prestigious firm.","彼はそんな名門企業で働く機会に飛びついた。"],
+  ["leap out at ~","目に飛び込む","A key detail in the contract leapt out at her immediately.","契約書の重要な詳細がすぐに彼女の目に飛び込んできた。"],
+  ["leave out","省く","Don't leave out any important information in your application.","申請書で重要な情報を省かないでください。"],
+  ["let down","失望させる","I was really let down by his lack of effort.","彼の努力不足に本当にがっかりした。"],
+  ["let on","悟られる","He knew about the party but didn't let on until the right moment.","彼はパーティーのことを知っていたが、適切なタイミングまで悟られないようにした。"],
+  ["let up","収まる、弱まる","The storm finally let up after three days of heavy rain.","3日間の大雨の後、嵐がついに収まった。"],
+  ["level off","安定する","After a sharp rise, prices began to level off.","急激な上昇の後、価格は安定し始めた。"],
+  ["level with ~","正直に言う","Let me level with you — the situation is more serious than you think.","正直に言いますが、状況はあなたが思うより深刻です。"],
+  ["limber up","準備運動をする","The dancers limbered up for thirty minutes before the show.","ダンサーたちはショーの前に30分間準備運動をした。"],
+  ["live down","忘れさせる","He'll never fully live down that embarrassing moment.","彼はあの恥ずかしい瞬間をずっと引きずるだろう。"],
+  ["load up on ~","たっぷり摂る","She loaded up on vitamins before the long flight.","彼女は長フライトの前にビタミンをたっぷり摂った。"],
+  ["lop off","切り落とす","The groundskeeper lopped off the overhanging tree branches.","庭師は張り出した木の枝を切り落とした。"],
+  ["louse up","しくじる","He loused up the interview by arriving in casual clothes.","彼はカジュアルな服装で来て面接をしくじった。"],
+  ["make away with ~","盗んで逃げる","The thieves made away with valuable jewels from the museum.","泥棒たちは博物館から貴重な宝石を盗んで逃げた。"],
+  ["make off with ~","持ち逃げする","Someone made off with my laptop while I was in the café.","カフェにいる間に誰かが私のノートパソコンを持ち逃げした。"],
+  ["make up","仲直りする","After the argument, they made up and went out for dinner.","口論の後、彼らは仲直りして夕食に出かけた。"],
+  ["mark out","際立たせる","She was marked out as exceptional from her very first day.","彼女は初日から特別な存在として見なされた。"],
+  ["mark up","値上げする","The retailer marks up imported goods by as much as sixty percent.","小売業者は輸入品を最大60%値上げしている。"],
+  ["mete out","与える（罰など）","The court meted out the harshest possible sentence.","裁判所は最も厳しい判決を言い渡した。"],
+  ["mill about","うろうろする","People were milling about outside, waiting for the doors to open.","ドアが開くのを待って、人々が外をうろうろしていた。"],
+  ["mix up","混同する","She mixed up the twins again and called them by the wrong names.","彼女はまた双子を混乱させて間違った名前で呼んだ。"],
+  ["mouth off","口答えする","He mouthed off to his teacher and got into trouble.","彼は先生に口答えして問題になった。"],
+  ["muddle through","なんとかやり遂げる","Without a clear plan, they just had to muddle through.","明確な計画がなく、彼らはただなんとかやり遂げるしかなかった。"],
+  ["mull over","じっくり考える","Take your time to mull over the offer before deciding.","決める前に時間をかけてその申し出についてじっくり考えてください。"],
+  ["muscle in on ~","強引に割り込む","A rival company tried to muscle in on their market share.","競合会社が彼らの市場シェアに強引に割り込もうとした。"],
+  ["nail down","確定する","We need to nail down all the details before the presentation.","プレゼンテーションの前に全ての詳細を確定しなければならない。"],
+  ["nibble at ~","少しずつかじる","She nibbled at the food but didn't seem very hungry.","彼女は食べ物を少しずつかじったが、あまりお腹が空いていないようだった。"],
+  ["nibble away at ~","少しずつ侵食する","Inflation continues to nibble away at people's purchasing power.","インフレが人々の購買力を少しずつ侵食し続けている。"],
+  ["nod off","うとうとする","She nodded off in front of the TV after dinner.","彼女は夕食後にテレビの前でうとうとした。"],
+  ["nose around ~","嗅ぎ回る","She caught him nosing around her desk when she came back.","戻ってきたとき、彼が自分の机の周りを嗅ぎ回っているのを見つけた。"],
+  ["own up","認める、白状する","He finally owned up to taking the money from the register.","彼はついにレジからお金を盗ったことを認めた。"],
+  ["pack off","送り出す","She packed the kids off to their grandparents for the holidays.","彼女は休日に子どもたちを祖父母のところに送り出した。"],
+  ["palm off","偽って売りつける","He tried to palm off a counterfeit note at the market.","彼は市場で偽札を使おうとした。"],
+  ["pan out","うまくいく","Unfortunately, the new business venture didn't pan out.","残念ながら、新しいビジネスの冒険はうまくいかなかった。"],
+  ["paper over","取り繕う","They papered over their differences to get through the project.","彼らは意見の相違を取り繕ってプロジェクトを乗り越えた。"],
+  ["pass A off as B","〜として偽る","He tried to pass the replica off as an authentic antique.","彼はレプリカを本物の骨董品として偽ろうとした。"],
+  ["pass down","受け継ぐ","These traditional techniques have been passed down for centuries.","これらの伝統的な技術は何世紀にもわたって受け継がれてきた。"],
+  ["pass over","見送る","He was passed over for the promotion three times.","彼は3回も昇進を見送られた。"],
+  ["pass up","見逃す、断る","I couldn't pass up the chance to meet my favourite author.","大好きな作家に会うチャンスを見逃すわけにはいかなかった。"],
+  ["patch up","修復する","They patched things up after a long and honest conversation.","長く誠実な会話の後、彼らは関係を修復した。"],
+  ["pay off","実を結ぶ","All her long hours of studying finally paid off.","長時間の勉強がついに実を結んだ。"],
+  ["pep up","元気づける","A short walk outside always peps me up when I'm tired.","疲れているとき、外を少し歩くと必ず元気になる。"],
+  ["perk up","明るくなる","She perked up as soon as she heard she had passed the test.","試験に合格したと聞いてすぐに彼女の気分が明るくなった。"],
+  ["peter out","途絶える、衰える","The trail petered out before reaching the summit.","道は頂上に到達する前に途絶えた。"],
+  ["phase out","段階的に廃止する","The airline is phasing out its older aircraft models.","航空会社は古い機種を段階的に廃止している。"],
+  ["pick up on ~","気づく","She picked up on the awkward atmosphere the moment she walked in.","彼女は入った瞬間に気まずい雰囲気に気づいた。"],
+  ["piece together","つなぎ合わせる","Investigators pieced together what had happened from the evidence.","捜査員たちは証拠から何が起きたかをつなぎ合わせた。"],
+  ["pin down","特定する","It's hard to pin down exactly when the tradition started.","その伝統がいつ始まったかを正確に特定するのは難しい。"],
+  ["pine for ~","恋しく思う","She pined for her family while working overseas.","彼女は海外で働いている間、家族を恋しく思った。"],
+  ["pipe down","静かにする","Can everyone pipe down? I'm trying to concentrate.","みんな静かにしてくれますか？集中しようとしています。"],
+  ["pitch in","協力する","If everyone pitches in, we can finish in an hour.","みんなが協力すれば、一時間で終わらせることができる。"],
+  ["play along","合わせる","He played along with the joke to avoid awkwardness.","ぎこちなさを避けるために彼は冗談に合わせた。"],
+  ["play down","軽く見せる","The spokesperson played down the severity of the data breach.","広報担当者はデータ漏洩の深刻さを軽く見せた。"],
+  ["play havoc with ~","めちゃくちゃにする","The unexpected snowfall played havoc with our travel plans.","予期しない大雪が旅行計画をめちゃくちゃにした。"],
+  ["pluck up","振り絞る","She finally plucked up the courage to resign from her job.","彼女はついに仕事を辞める勇気を振り絞った。"],
+  ["poke around","探し回る","They poked around the old bookshop and found some real treasures.","彼らは古本屋を探し回って本物の宝物をいくつか見つけた。"],
+  ["polish off","食べ終える","He polished off the entire roast chicken in one sitting.","彼はローストチキン全体を一度の食事で食べ終えた。"],
+  ["pore over ~","念入りに調べる","She pored over the legal documents until late at night.","彼女は夜遅くまで法律文書を念入りに調べた。"],
+  ["pull off","やり遂げる","Against all odds, they managed to pull off the deal.","あらゆる困難に反して、彼らはなんとか取引をやり遂げた。"],
+  ["push for ~","求めて活動する","The group is pushing for stricter environmental regulations.","グループはより厳格な環境規制を求めて活動している。"],
+  ["put across","伝える","She put her argument across with great clarity.","彼女は主張を非常に明確に伝えた。"],
+  ["put forward","提案する","He put forward a bold new proposal at the annual conference.","彼は年次会議で大胆な新しい提案を出した。"],
+  ["put in for ~","申請する","She put in for a transfer to the regional office.","彼女は地方事務所への異動を申請した。"],
+  ["put off","先延ばしにする","Don't put off until tomorrow what you can do today.","今日できることを明日に延ばさないで。"],
+  ["puzzle over ~","頭を悩ませる","She puzzled over the cryptic message for hours.","彼女は謎めいたメッセージについて何時間も頭を悩ませた。"],
+  ["rack up","積み上げる","The startup racked up millions in losses in its first year.","そのスタートアップは初年度に何百万ドルもの損失を積み上げた。"],
+  ["rail against ~","激しく抗議する","She railed against the unfair treatment she had received.","彼女は受けた不当な扱いに激しく抗議した。"],
+  ["rake in","大儲けする","The shop raked in record profits during the holiday season.","休日シーズン中に店は記録的な利益を稼いだ。"],
+  ["rally around ~","支えるために集まる","Her colleagues rallied around her when she was diagnosed with cancer.","ガンと診断されたとき、同僚たちが彼女を支えるために集まった。"],
+  ["ramp up","強化する","The manufacturer ramped up production to meet the surge in demand.","メーカーは急増する需要に応えるために生産を強化した。"],
+  ["rattle off","すらすらと言う","He rattled off the list of ingredients without looking at his notes.","彼はメモを見ずに材料のリストをすらすらと読み上げた。"],
+  ["reel off","次々と読み上げる","She reeled off a series of impressive facts about the company.","彼女は会社についての印象的な事実を次々と読み上げた。"],
+  ["rein in","抑制する","The central bank moved to rein in inflation.","中央銀行はインフレを抑制するために動き出した。"],
+  ["ride out","乗り越える","The island community rode out the typhoon without major damage.","島のコミュニティは大きな被害なく台風を乗り越えた。"],
+  ["rifle through ~","かき回す","She rifled through her bag, looking frantically for her keys.","彼女は必死に鍵を探してバッグをかき回した。"],
+  ["rig up","組み立てる","They rigged up a water collection system from old plastic bottles.","彼らは古いペットボトルから集水システムを組み立てた。"],
+  ["rip off","ぼる、盗む","Tourists often get ripped off at overpriced souvenir shops.","観光客はよく値段が高すぎるお土産屋でぼられる。"],
+  ["roll back","撤回する","The government rolled back several controversial regulations.","政府はいくつかの物議を醸した規制を撤回した。"],
+  ["roll out","展開する","The new vaccine will be rolled out nationally next month.","来月、新しいワクチンが全国に展開される。"],
+  ["root for ~","応援する","I'm always rooting for the underdog in any competition.","私はどんな競争でも弱者をいつも応援している。"],
+  ["root out","根絶する","The new director is determined to root out inefficiency.","新しいディレクターは非効率を根絶することを決意している。"],
+  ["rope in","引き込む","They roped in volunteers to help set up the venue.","彼らは会場の設営を手伝うボランティアを引き込んだ。"],
+  ["rub off on ~","伝わる","His calm approach to problems rubbed off on his students.","問題への彼の落ち着いたアプローチが生徒たちに伝わった。"],
+  ["run up","積み上げる（借金）","She ran up a large bill during her business trip.","彼女は出張中に多額の請求書を作ってしまった。"],
+  ["rustle up","急いで作る","She rustled up a delicious meal from what was in the fridge.","彼女は冷蔵庫にあるもので美味しい食事を急いで作った。"],
+  ["saddle A with B","〜を押し付ける","He was saddled with all the extra work while the others were away.","他の人が不在の間、彼は全ての余分な仕事を押し付けられた。"],
+  ["sail through ~","楽々と通過する","She sailed through the driving test on her first attempt.","彼女は最初の試みで運転免許の試験を楽々と通過した。"],
+  ["scrape together","かき集める","He scraped together enough money to pay for his flight home.","彼は帰国便の費用を払うためにお金をなんとか工面した。"],
+  ["scrimp on","節約する","Don't scrimp on safety equipment when working at heights.","高所での作業時に安全装備を節約しないで。"],
+  ["settle for ~","妥協する","Don't settle for less than what you truly deserve.","自分が本当に値するものより少ないもので妥協しないで。"],
+  ["settle on ~","決める","After months of searching, they settled on a house near the park.","数ヶ月の探索の末、彼らは公園近くの家に決めた。"],
+  ["shake off","振り払う","She shook off the criticism and kept moving forward.","彼女は批判を振り払って前進し続けた。"],
+  ["shake up","刷新する","New leadership shook up the organisation completely.","新しいリーダーシップが組織を完全に揺さぶった。"],
+  ["shell out","支払う","He had to shell out thousands for unexpected dental work.","予期しない歯科治療のために何千ドルも支払わなければならなかった。"],
+  ["show off","見せびらかす","He loves showing off his new car to everyone he meets.","彼は会う人皆に新しい車を見せびらかすのが大好きだ。"],
+  ["shrug off","受け流す","She shrugged off the bad review and continued writing.","彼女は悪い評価を受け流して書き続けた。"],
+  ["shy away from ~","避ける","He always shies away from making difficult decisions.","彼はいつも難しい決断をすることを避ける。"],
+  ["side with ~","味方する","She sided with the employees rather than the management.","彼女は経営陣ではなく従業員の味方をした。"],
+  ["simmer down","落ち着く","Simmer down and listen carefully to what I'm saying.","落ち着いて、私が言っていることをよく聞いてください。"],
+  ["single out","特別に取り上げる","The teacher singled out three students for exceptional work.","先生は優れた成績で3人の生徒を特別に取り上げた。"],
+  ["sink in","実感として伝わる","The reality of the diagnosis took a while to sink in.","診断の現実が実感として伝わるまで少し時間がかかった。"],
+  ["sit in for ~","代わりを務める","My colleague sat in for me while I was on sick leave.","病気休暇中に同僚が私の代わりを務めてくれた。"],
+  ["skirt around ~","うまく避ける","The politician skirted around the most controversial questions.","政治家は最も物議を醸す質問をうまく避けた。"],
+  ["slow down","速度を落とす","You should slow down before you burn out completely.","完全に燃え尽きる前に速度を落としてください。"],
+  ["smack of ~","〜を感じさせる","His explanation smacks of dishonesty to me.","彼の説明には不誠実さを感じる。"],
+  ["smooth over","取り繕う","The mediator helped smooth over the conflict between the parties.","調停者が当事者間の対立を和らげる手助けをした。"],
+  ["snap out of ~","抜け出す","Snap out of it — we have work to do!","それから抜け出して。仕事があるんです！"],
+  ["snap up","素早く手に入れる","The limited edition shoes were snapped up within an hour.","限定版の靴は一時間以内に売り切れた。"],
+  ["snuff out","鎮圧する","The rebellion was swiftly snuffed out by security forces.","反乱は治安部隊によって迅速に鎮圧された。"],
+  ["soak up","吸収する","He loves soaking up the culture whenever he travels.","彼は旅行するたびに文化を吸収するのが大好きだ。"],
+  ["sort out","整理する","We need to sort out the logistics before the event.","イベントの前に物流を整理する必要がある。"],
+  ["sound out","意向を探る","She sounded out her investors before making the announcement.","発表する前に彼女は投資家たちの意向を探った。"],
+  ["speed up","速める","Can you speed up? We're going to miss the flight!","速くできますか？フライトに遅れます！"],
+  ["spice up","盛り上げる","She spiced up her presentation with some interesting videos.","彼女はいくつかの興味深い動画でプレゼンテーションを盛り上げた。"],
+  ["sponge off","寄食する","He's been sponging off his flatmates since he lost his job.","仕事を失って以来、彼はフラットメートにずっと寄食している。"],
+  ["spring up","次々と現れる","New coffee shops have been springing up all over the neighbourhood.","近所の至る所に新しいコーヒーショップが次々と生まれている。"],
+  ["spruce up","きれいにする","We spruced up the garden before the guests arrived.","ゲストが来る前に庭をきれいに整えた。"],
+  ["spur on","奮い立たせる","The coach's words of encouragement spurred the team on.","コーチの励ましの言葉がチームを奮い立たせた。"],
+  ["squeak through","ギリギリ通過する","He squeaked through the final round with the minimum score.","彼は最低点でなんとかギリギリ最終ラウンドを通過した。"],
+  ["squeeze in","詰め込む","Can we squeeze in a quick meeting before lunch?","昼食前に短い会議を詰め込めますか？"],
+  ["stake out","張り込む","Reporters staked out the celebrity's home for days.","レポーターたちは数日間、そのセレブの家を張り込んだ。"],
+  ["stamp out","撲滅する","The campaign aims to stamp out plastic waste in the ocean.","キャンペーンは海洋プラスチック廃棄物を撲滅することを目指している。"],
+  ["stand by","支える、待機する","She stood by her husband throughout the difficult legal battle.","彼女は困難な法廷闘争を通じて夫の側に立ち続けた。"],
+  ["stave off","防ぐ","A healthy diet can help stave off many serious illnesses.","健康的な食事は多くの深刻な病気を防ぐのに役立つ。"],
+  ["stem from ~","〜から生じる","Most of his problems stem from a deep lack of self-confidence.","彼の問題のほとんどは深刻な自信のなさから生じている。"],
+  ["stick around","残る","Stick around after the presentation — there will be refreshments.","プレゼンテーションの後、残っていてください。軽食があります。"],
+  ["store up","貯める","She stored up annual leave to take a long honeymoon.","彼女は長い新婚旅行のために年次有給休暇を貯めておいた。"],
+  ["stow away","密航する","He stowed away on a freighter to cross the border.","彼は国境を越えるために貨物船に密航した。"],
+  ["strike on ~","思いつく","She struck on an original idea while walking to the office.","オフィスへ歩いていた時、彼女は独創的なアイデアを思いついた。"],
+  ["strike up","始める","He struck up a conversation with the stranger at the bus stop.","彼はバス停で見知らぬ人に話しかけた。"],
+  ["stumble across ~","偶然見つける","She stumbled across her old diary while cleaning the attic.","彼女は屋根裏を掃除中に古い日記を偶然見つけた。"],
+  ["suck up to ~","へつらう","He was always sucking up to the boss to get better shifts.","彼はより良いシフトを得るためにいつも上司にへつらっていた。"],
+  ["sum up","まとめる","To sum up, we need to act quickly and decisively.","要約すると、私たちは迅速かつ果断に行動する必要があります。"],
+  ["swear by ~","絶大に信頼する","Athletes often swear by cold water plunges for recovery.","アスリートはよく回復のための冷水浴を絶大に信頼している。"],
+  ["tack on","追加する","A delivery charge was tacked on at the checkout.","精算時に配送料が追加された。"],
+  ["tail off","徐々に減る","Demand for the product tailed off after the initial hype.","最初の話題性の後、製品への需要は徐々に減っていった。"],
+  ["take in","騙される、受け入れる","She was completely taken in by his convincing story.","彼女は彼の説得力のある話に完全に騙された。"],
+  ["take off","離陸する、急成長する","Sales really took off once the celebrity endorsed the product.","セレブが製品を宣伝してから売上が本当に急上昇した。"],
+  ["take on","引き受ける","The company is taking on fifty new staff members next month.","会社は来月50人の新しいスタッフを採用する。"],
+  ["take to ~","好きになる","He took to running immediately and ran every day for a year.","彼はすぐにランニングが好きになり、一年間毎日走った。"],
+  ["take up","始める","She took up pottery classes to fill her evenings.","彼女は夕方の時間を埋めるために陶芸クラスを始めた。"],
+  ["tamper with ~","改ざんする","The security footage had clearly been tampered with.","防犯映像は明らかに改ざんされていた。"],
+  ["tap into ~","活用する","The company hopes to tap into the growing health food market.","会社は成長している健康食品市場に参入したいと考えている。"],
+  ["taper off","徐々に減る","Her visits to the gym tapered off as work got busier.","仕事が忙しくなるにつれて彼女のジムへの通いは徐々に減っていった。"],
+  ["tear into ~","猛烈に批判する","The inspector tore into the company's safety record.","検査官は会社の安全記録を厳しく批判した。"],
+  ["thin out","減る","The queue thinned out considerably after lunch.","昼食後、行列はかなり減った。"],
+  ["throw away","捨てる","Don't throw away a perfectly good opportunity like this.","このような申し分ない機会を無駄にしないで。"],
+  ["thumb through ~","ぱらぱらとめくる","He thumbed through the guidebook looking for restaurant tips.","彼はレストランのヒントを探してガイドブックをぱらぱらとめくった。"],
+  ["tide over","乗り越えさせる","The loan should tide us over until the payment arrives.","支払いが届くまでそのローンで乗り越えられるはずだ。"],
+  ["tip off","密告する","An informant tipped off the police about the smuggling operation.","情報提供者が密輸活動について警察に密告した。"],
+  ["tower over ~","圧倒する","The new skyscraper towers over every other building in the city.","新しい高層ビルが街の他の全ての建物を圧倒している。"],
+  ["toy with ~","思い巡らせる","He's been toying with the idea of moving abroad for a year.","彼は一年間、海外に移住するという考えを思い巡らせている。"],
+  ["trail off","声が小さくなる","Her voice trailed off as she struggled to find the right words.","適切な言葉を見つけようとして彼女の声はだんだん小さくなった。"],
+  ["trim down","削減する","The budget was trimmed down by twenty percent.","予算は20%削減された。"],
+  ["trump up","でっち上げる","The charges against him were clearly trumped up.","彼に対する告発は明らかにでっち上げだった。"],
+  ["turn to ~","頼る","She turned to meditation when stress became overwhelming.","ストレスが耐えられなくなったとき、彼女は瞑想に頼るようにした。"],
+  ["usher in","切り開く","The invention of the internet ushered in a new age of communication.","インターネットの発明は通信の新時代を切り開いた。"],
+  ["vouch for ~","保証する","I can vouch for his reliability — he has never let me down.","彼の信頼性は私が保証します。彼は私を失望させたことがありません。"],
+  ["walk out on ~","去る、捨てる","She walked out on the job without any notice.","彼女は何の通知もなしに仕事を辞めた。"],
+  ["wash over ~","広がる","A sense of calm washed over her as she sat by the sea.","海辺に座っていると穏やかな感覚が彼女の心に広がった。"],
+  ["waste away","衰弱する","He wasted away in hospital for months before recovering.","彼は回復する前に何ヶ月も病院で衰弱していった。"],
+  ["wear off","薄れる、切れる","The anaesthetic wore off and the pain returned.","麻酔が切れて痛みが戻ってきた。"],
+  ["weed out","排除する","The screening process weeds out unsuitable candidates early.","選考プロセスで不適切な候補者を早い段階に排除する。"],
+  ["weigh in","意見を述べる","Several experts weighed in with their opinions on the issue.","いくつかの専門家がその問題について意見を述べた。"],
+  ["while away","のんびり過ごす","He whiled away the afternoon fishing by the river.","彼は川岸で魚釣りをして午後をのんびり過ごした。"],
+  ["whip up","急いで作る","She whipped up a batch of scones in under thirty minutes.","彼女は30分以内でスコーンを一バッチ素早く作った。"],
+  ["wind down","終わりに向かう","The event began to wind down around ten o'clock.","イベントは10時頃に徐々に終わりに向かった。"],
+  ["wind up","結局〜になる","We wound up spending the whole day at the market.","結局、一日中市場で過ごすことになった。"],
+  ["wipe out","壊滅させる","The tsunami wiped out entire coastal communities.","津波が沿岸のコミュニティ全体を壊滅させた。"],
+  ["without fail","必ず","She attends the morning meeting without fail every day.","彼女は毎日必ず朝の会議に出席する。"],
+  ["wolf down","かき込む","He wolfed down his lunch and ran back to his desk.","彼は昼食をかき込んで自分の机に走って戻った。"],
+  ["worm A out of B","引き出す","She wormed the truth out of him eventually.","彼女はついに彼から真実を引き出した。"],
+  ["wrap up","締めくくる","Let's wrap up this session — we're running over time.","時間が超過していますので、このセッションを締めくくりましょう。"],
+  ["wreak havoc on ~","大きな被害をもたらす","The cyberattack wreaked havoc on the bank's systems.","サイバー攻撃が銀行のシステムに大きな被害をもたらした。"],
+  ["wriggle out of ~","〜から逃れる","He somehow wriggled out of every difficult conversation.","彼はなんとか全ての難しい会話から逃れた。"],
+  ["write off","帳消しにする","The insurance company agreed to write off the car as a total loss.","保険会社は車を全損として処理することに同意した。"],
+  ["zero in on ~","特定する、絞り込む","The detective zeroed in on the prime suspect immediately.","探偵はすぐに主要容疑者を特定した。"],
 ];
 
-const CHINESE_WORDS = [
-  {id:1, phrase:"破釜沉舟 (pò fǔ chén zhōu)", def:"不退転の決意で事に当たる", img:"https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=400&q=80"},
-  {id:2, phrase:"半途而废 (bàn tú ér fèi)", def:"中途半端に投げ出す", img:"https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=400&q=80"}
-];
-
-const WRITING_TASK = {
-  title: "Sustainable Tourism",
-  passage: "In recent decades, sustainable tourism has emerged as a potential solution to environmental degradation. It prioritizes local ecosystems and distributes economic benefits. However, critics point to the risk of 'greenwashing' and the carbon footprint of long-distance travel. Rigorous regulation is essential.",
-  hints: ["Environmental impact", "Local benefits", "Strict regulation"]
-};
-
-// --- State ---
-let mode = 'home';
-let progress = JSON.parse(localStorage.getItem('suite_progress') || '{}');
-let currentIdx = 0;
-let isFlipped = false;
-
-// --- Logic ---
-function save() { localStorage.setItem('suite_progress', JSON.stringify(progress)); }
-
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2000);
+// Split into 20 units (19 words each)
+const UNITS = [];
+for (let i = 0; i < 20; i++) {
+  UNITS.push(ALL_WORDS.slice(i * 19, (i + 1) * 19));
 }
 
-function setMode(m) {
-  mode = m;
-  document.querySelectorAll('.ntab').forEach(t => t.classList.toggle('active', t.textContent.includes(m === 'phrasal' ? '句動詞' : m === 'writing' ? '要約' : m === 'chinese' ? '中国語' : m === 'sanskrit' ? 'サンスクリット' : 'ホーム')));
-  render();
+// ════════════════════════════════════════
+// STATE & STORAGE
+// ════════════════════════════════════════
+let levels = {};      // phrase -> 1-5
+let lastStudy = '';   // YYYY-MM-DD
+let studyTime = 0;    // minutes today
+let streak = 0;
+let studyStartTime = 0;
+
+function load() {
+  try { levels = JSON.parse(localStorage.getItem('pv_levels') || '{}'); } catch {}
+  try { lastStudy = localStorage.getItem('pv_lastStudy') || ''; } catch {}
+  try { studyTime = parseInt(localStorage.getItem('pv_studyTime') || '0'); } catch {}
+  try { streak = parseInt(localStorage.getItem('pv_streak') || '0'); } catch {}
+  updateStreak();
 }
 
-function tts(text, lang = 'UK English Female') {
-  if (window.responsiveVoice) {
-    responsiveVoice.speak(text, lang, {rate: 0.9});
+function save() {
+  try {
+    localStorage.setItem('pv_levels', JSON.stringify(levels));
+    localStorage.setItem('pv_lastStudy', lastStudy);
+    localStorage.setItem('pv_studyTime', studyTime.toString());
+    localStorage.setItem('pv_streak', streak.toString());
+  } catch {}
+}
+
+function updateStreak() {
+  const today = new Date().toISOString().split('T')[0];
+  if (lastStudy === today) return;
+  
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+  if (lastStudy === yesterday) {
+    streak++;
+  } else if (lastStudy !== '') {
+    streak = 1;
+  } else {
+    streak = 1;
+  }
+  lastStudy = today;
+  save();
+}
+
+function startStudyTimer() {
+  studyStartTime = Date.now();
+}
+
+function updateStudyTime() {
+  if (studyStartTime === 0) return;
+  const elapsed = Math.floor((Date.now() - studyStartTime) / 60000);
+  if (elapsed > 0) {
+    studyTime += elapsed;
+    studyStartTime = Date.now();
+    save();
   }
 }
 
-// --- Renderers ---
-function render() {
-  const container = document.getElementById('content');
-  if (mode === 'home') container.innerHTML = renderHome();
-  else if (mode === 'phrasal') container.innerHTML = renderPhrasal();
-  else if (mode === 'writing') container.innerHTML = renderWriting();
-  else if (mode === 'chinese') container.innerHTML = renderChinese();
-  else if (mode === 'sanskrit') container.innerHTML = renderSanskrit();
-}
+setInterval(updateStudyTime, 60000);
 
-function renderHome() {
-  const known = Object.values(progress).filter(v => v === 'known').length;
-  return `
-    <div class="card">
-      <div style="font-size: 13px; color: var(--sub); margin-bottom: 5px;">全体の進捗</div>
-      <div style="font-size: 28px; font-weight: 800; color: var(--accent);">${known} / 500+ <small style="font-size:14px">語</small></div>
-    </div>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-      <div class="card" onclick="setMode('phrasal')" style="text-align:center; cursor:pointer">
-        <div style="font-size:24px">📖</div><div style="font-size:12px; margin-top:8px">句動詞特訓</div>
-      </div>
-      <div class="card" onclick="setMode('writing')" style="text-align:center; cursor:pointer">
-        <div style="font-size:24px">📝</div><div style="font-size:12px; margin-top:8px">英検1級要約</div>
-      </div>
-      <div class="card" onclick="setMode('chinese')" style="text-align:center; cursor:pointer">
-        <div style="font-size:24px">🇨🇳</div><div style="font-size:12px; margin-top:8px">HSK6級成語</div>
-      </div>
-      <div class="card" onclick="setMode('sanskrit')" style="text-align:center; cursor:pointer">
-        <div style="font-size:24px">🪷</div><div style="font-size:12px; margin-top:8px">サンスクリット</div>
-      </div>
-    </div>
-    <div class="card">
-      <div style="font-size:13px; color: var(--sub); margin-bottom:10px">本日のリマインダー</div>
-      <div style="font-size:14px; line-height:1.6">
-        ・10月の歌唱発表会に向けて、暗記アプリに歌詞を登録しましょう。<br>
-        ・新潟の工芸技術に関する用語を「中国語」セクションに追加しました。
-      </div>
-    </div>
-  `;
-}
+load();
 
-function renderPhrasal() {
-  const v = PHRASAL_VERBS[currentIdx % PHRASAL_VERBS.length];
-  return `
-    <div class="flip-wrap" onclick="this.querySelector('.flip-inner').classList.toggle('is-flipped'); tts('${v.phrase}')">
-      <div class="flip-inner">
-        <div class="card-face card-front">
-          <div style="font-size:12px; color:var(--sub); margin-bottom:15px">Phrasal Verb</div>
-          <div style="font-size:24px; font-weight:800; text-align:center; font-style:italic">${v.phrase}</div>
-        </div>
-        <div class="card-face card-back">
-          <div style="font-size:20px; font-weight:800; color:var(--accent); margin-bottom:15px">${v.def}</div>
-          <div style="font-size:14px; line-height:1.6; margin-bottom:10px">${v.en}</div>
-          <div style="font-size:12px; color:var(--sub)">${v.ja}</div>
-        </div>
-      </div>
-    </div>
-    <div style="display:flex; gap:10px">
-      <button class="pill" onclick="currentIdx++; render()">次へ →</button>
-      <button class="pill btn-accent" onclick="progress[${v.id}]='known'; save(); toast('覚えた！'); currentIdx++; render()">覚えた ✅</button>
-    </div>
-  `;
-}
+// ════════════════════════════════════════
+// STUDY MODE
+// ════════════════════════════════════════
+let studyMode = 'auto';
+let studyQueue = [];
+let studyIdx = 0;
+let isFlipped = false;
+let isPlaying = false;
+let speedIdx = 1;
+let autoChain = null;
 
-function renderWriting() {
-  return `
-    <div class="card">
-      <div style="font-weight:700; color:var(--accent); margin-bottom:10px">英検1級 要約課題</div>
-      <div style="font-size:12px; background:var(--bg); padding:10px; border-radius:8px; line-height:1.5; margin-bottom:15px; max-height:120px; overflow-y:auto">${WRITING_TASK.passage}</div>
-      <div style="font-size:11px; color:var(--sub); margin-bottom:10px">構成：①導入(25語) ②展開(40語) ③結論(40語)</div>
-      <textarea id="p1" rows="2" placeholder="1. 導入 (Background/Main theme)"></textarea>
-      <textarea id="p2" rows="3" placeholder="2. 展開 (Benefits/Details)"></textarea>
-      <textarea id="p3" rows="3" placeholder="3. 結論 (Challenges/Final view)"></textarea>
-      <button class="pill btn-accent" onclick="copyWritingPrompt()">AI添削用にコピーする</button>
-    </div>
-  `;
-}
+// Speed: [pause_after_en, pause_after_ja, speech_rate_en, speech_rate_ja]
+const SPEEDS = [
+  [1000, 900, 0.75, 0.8],   // slow
+  [700, 600, 0.9, 0.95],     // normal
+  [400, 300, 1.1, 1.15],     // fast
+];
 
-function copyWritingPrompt() {
-  const text = `${document.getElementById('p1').value}\n\n${document.getElementById('p2').value}\n\n${document.getElementById('p3').value}`;
-  const prompt = `あなたは英検1級の添削者です。以下の3段落構成の要約を、論理性、語彙（言い換え）、文法の観点から添削してください。\n\n【要約本文】\n${text}`;
-  navigator.clipboard.writeText(prompt);
-  toast('コピーしました！AIに貼り付けてください');
-}
-
-function renderChinese() {
-  const w = CHINESE_WORDS[currentIdx % CHINESE_WORDS.length];
-  return `
-    <div class="card" style="padding:0; overflow:hidden">
-      <img src="${w.img}" style="width:100%; height:180px; object-fit:cover">
-      <div style="padding:20px; text-align:center">
-        <div style="font-size:22px; font-weight:800; margin-bottom:10px">${w.phrase}</div>
-        <div style="font-size:16px; color:var(--accent)">${w.def}</div>
-        <button class="spk" style="margin-top:15px; background:none; border:none; color:var(--accent); cursor:pointer" onclick="tts('${w.phrase}', 'Chinese Female')">🔊 発音を聴く</button>
-      </div>
-    </div>
-    <button class="pill" onclick="currentIdx++; render()">次の成語へ</button>
-  `;
-}
-
-function renderSanskrit() {
-  setTimeout(initSanskrit, 100);
-  return `
-    <div class="card" style="text-align:center">
-      <div style="font-size:13px; color:var(--sub); margin-bottom:10px">デーヴァナーガリー文字 練習</div>
-      <canvas id="sketchpad" width="300" height="200"></canvas>
-      <button class="pill" onclick="clearCanvas()">クリア</button>
-      <div style="margin-top:15px; font-size:12px; color:var(--sub)">お手本をイメージして、指でなぞってみましょう。</div>
-    </div>
-  `;
-}
-
-// --- Canvas Logic ---
-let ctx, drawing = false;
-function initSanskrit() {
-  const canvas = document.getElementById('sketchpad');
-  if(!canvas) return;
-  ctx = canvas.getContext('2d');
-  ctx.strokeStyle = '#0d1117'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+function setMode(m) {
+  studyMode = m;
+  document.getElementById('btn-auto').classList.toggle('active', m === 'auto');
+  document.getElementById('btn-manual').classList.toggle('active', m === 'manual');
+  document.getElementById('speed-row').style.display = m === 'auto' ? 'flex' : 'none';
+  document.getElementById('study-main').classList.toggle('clickable', m === 'manual');
   
-  const start = e => { drawing = true; draw(e); };
-  const end = () => { drawing = false; ctx.beginPath(); };
-  const draw = e => {
-    if(!drawing) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-    const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-    ctx.lineTo(x, y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, y);
-  };
-
-  canvas.addEventListener('mousedown', start); canvas.addEventListener('touchstart', start);
-  window.addEventListener('mouseup', end); window.addEventListener('touchend', end);
-  canvas.addEventListener('mousemove', draw); canvas.addEventListener('touchmove', draw);
+  updateTapHint();
+  
+  if (m === 'auto') {
+    document.getElementById('ctrl-play').textContent = '▶';
+    document.getElementById('start-overlay').classList.add('show');
+  } else {
+    document.getElementById('ctrl-play').textContent = '↩';
+    document.getElementById('start-overlay').classList.remove('show');
+    isFlipped = false;
+    showStudyCard();
+  }
 }
-function clearCanvas() { ctx.clearRect(0, 0, 300, 200); }
 
-// Initial Render
-render();
+function updateTapHint() {
+  const hint = document.getElementById('tap-hint');
+  if (!hint) return;
+  
+  if (studyMode === 'manual') {
+    hint.textContent = 'タップでめくる';
+  } else if (studyMode === 'auto') {
+    if (isPlaying) {
+      hint.textContent = 'タップで一時停止';
+    } else {
+      hint.textContent = 'タップでめくる（レベル設定後は自動で次へ）';
+    }
+  }
+}
+
+function startStudy(words, title = 'ユニット') {
+  // Apply spaced repetition: lower levels appear more
+  const weighted = [];
+  words.forEach(w => {
+    const lv = levels[w[0]] || 1;
+    const weight = 6 - lv; // lv1=5x, lv2=4x, lv3=3x, lv4=2x, lv5=1x
+    for (let i = 0; i < weight; i++) weighted.push(w);
+  });
+  studyQueue = [...weighted].sort(() => Math.random() - 0.5);
+  studyIdx = 0;
+  isFlipped = false;
+  isPlaying = false;
+  
+  document.getElementById('nav-btn').textContent = '← ' + title;
+  showPage('study');
+  startStudyTimer();
+  if (studyMode === 'auto') {
+    document.getElementById('start-overlay').classList.add('show');
+  } else {
+    document.getElementById('start-overlay').classList.remove('show');
+    showStudyCard();
+  }
+}
+
+function startUnit(unitIdx) {
+  startStudy(UNITS[unitIdx], `Unit ${unitIdx + 1}`);
+}
+
+function startSpecial(type) {
+  if (type === 'weak') {
+    const weak = ALL_WORDS.filter(w => (levels[w[0]] || 1) <= 2);
+    if (weak.length === 0) { alert('弱点なし！'); return; }
+    startStudy(weak, '弱点集中');
+  } else if (type === 'daily') {
+    const daily = [...ALL_WORDS].sort(() => Math.random() - 0.5).slice(0, 20);
+    startStudy(daily, '今日の20語');
+  } else if (type === 'quiz') {
+    startQuiz();
+  }
+}
+
+function showStudyCard() {
+  if (studyIdx >= studyQueue.length) {
+    document.getElementById('card-phrase').textContent = '完了！';
+    document.getElementById('card-meaning').style.display = 'none';
+    document.getElementById('card-example').style.display = 'none';
+    document.getElementById('level-buttons').style.display = 'none';
+    document.getElementById('card-phase').textContent = 'COMPLETE';
+    return;
+  }
+  
+  const [phrase, meaning, exEn, exJa] = studyQueue[studyIdx];
+  const total = studyQueue.length;
+  
+  document.getElementById('study-progress').textContent = (studyIdx + 1) + ' / ' + total;
+  document.getElementById('pbar').style.width = ((studyIdx) / total * 100) + '%';
+  
+  const card = document.getElementById('study-card');
+  const phraseEl = document.getElementById('card-phrase');
+  const meaningEl = document.getElementById('card-meaning');
+  const exampleEl = document.getElementById('card-example');
+  const levelBtns = document.getElementById('level-buttons');
+  
+  card.classList.toggle('flipped', isFlipped);
+  phraseEl.classList.toggle('small', isFlipped);
+  
+  if (!isFlipped) {
+    // Front
+    phraseEl.textContent = phrase;
+    meaningEl.style.display = 'none';
+    exampleEl.style.display = 'none';
+    levelBtns.style.display = 'none';
+    document.getElementById('card-phase').textContent = 'PHRASAL VERB';
+  } else {
+    // Back
+    phraseEl.textContent = phrase;
+    meaningEl.textContent = meaning;
+    meaningEl.style.display = 'block';
+    document.getElementById('card-example-en').textContent = exEn;
+    document.getElementById('card-example-ja').textContent = exJa;
+    exampleEl.style.display = 'block';
+    levelBtns.style.display = 'flex';
+    document.getElementById('card-phase').textContent = '意　　　　味';
+    
+    // Update level buttons
+    const lv = levels[phrase] || 1;
+    for (let i = 1; i <= 5; i++) {
+      document.querySelector(`.lv-btn.lv${i}`).classList.toggle('active', i === lv);
+    }
+  }
+  
+  document.getElementById('study-card').classList.remove('fade-in');
+  void document.getElementById('study-card').offsetWidth;
+  document.getElementById('study-card').classList.add('fade-in');
+}
+
+function setLevel(lv) {
+  if (studyIdx >= studyQueue.length) return;
+  const phrase = studyQueue[studyIdx][0];
+  levels[phrase] = lv;
+  save();
+  showStudyCard();
+  
+  // In auto mode (paused), advance to next card after setting level
+  if (studyMode === 'auto' && !isPlaying) {
+    setTimeout(() => {
+      studyIdx++;
+      isFlipped = false;
+      showStudyCard();
+    }, 400);
+  }
+}
+
+function goPrev() {
+  stopAuto();
+  studyIdx = Math.max(0, studyIdx - 1);
+  isFlipped = false;
+  showStudyCard();
+}
+
+function goNext() {
+  stopAuto();
+  studyIdx++;
+  isFlipped = false;
+  if (studyMode === 'auto' && isPlaying) startAutoChain();
+  else showStudyCard();
+}
+
+function togglePlay() {
+  if (studyMode === 'auto') {
+    isPlaying = !isPlaying;
+    document.getElementById('ctrl-play').textContent = isPlaying ? '⏸' : '▶';
+    document.getElementById('pause-overlay').classList.toggle('show', !isPlaying);
+    updateTapHint();
+    if (isPlaying) {
+      // Resume: if already flipped, move to next; otherwise continue
+      if (isFlipped) {
+        studyIdx++;
+        isFlipped = false;
+      }
+      startAutoChain();
+    } else {
+      stopAuto();
+    }
+  } else {
+    // Manual: flip
+    isFlipped = !isFlipped;
+    showStudyCard();
+    if (isFlipped) {
+      speakEN(studyQueue[studyIdx][0]);
+      setTimeout(() => speakJA(studyQueue[studyIdx][1]), 1200);
+    }
+  }
+}
+
+// Manual mode tap
+document.getElementById('study-main').addEventListener('click', (e) => {
+  // Don't interfere with button clicks
+  if (e.target.closest('button')) return;
+  
+  if (studyMode === 'manual') {
+    // Manual mode: always flip
+    isFlipped = !isFlipped;
+    showStudyCard();
+    if (isFlipped) {
+      speakEN(studyQueue[studyIdx][0]);
+      setTimeout(() => speakJA(studyQueue[studyIdx][1]), 1200);
+    }
+  } else if (studyMode === 'auto') {
+    if (isPlaying) {
+      // Auto + playing: pause
+      isPlaying = false;
+      document.getElementById('ctrl-play').textContent = '▶';
+      document.getElementById('pause-overlay').classList.add('show');
+      stopAuto();
+    } else {
+      // Auto + paused: flip manually
+      isFlipped = !isFlipped;
+      showStudyCard();
+      if (isFlipped) {
+        speakEN(studyQueue[studyIdx][0]);
+        setTimeout(() => speakJA(studyQueue[studyIdx][1]), 1200);
+      }
+    }
+  }
+});
+
+function startAuto() {
+  isPlaying = true;
+  document.getElementById('start-overlay').classList.remove('show');
+  document.getElementById('ctrl-play').textContent = '⏸';
+  document.getElementById('pause-overlay').classList.remove('show');
+  updateTapHint();
+  isFlipped = false;
+  studyIdx = 0;
+  startAutoChain();
+}
+
+function startAutoChain() {
+  clearTimeout(autoChain); // Clear timer but don't cancel speech
+  if (!isPlaying || studyIdx >= studyQueue.length) {
+    showStudyCard();
+    return;
+  }
+  
+  isFlipped = false;
+  showStudyCard();
+  
+  const [phrase, meaning] = studyQueue[studyIdx];
+  const [pauseEn, pauseJa, rateEn, rateJa] = SPEEDS[speedIdx];
+  
+  // Step 1: speak EN
+  speakENChain(phrase, rateEn, () => {
+    if (!isPlaying) return;
+    // Step 2: wait, then flip
+    autoChain = setTimeout(() => {
+      if (!isPlaying) return;
+      isFlipped = true;
+      showStudyCard();
+      // Step 3: speak JA
+      speakJAChain(meaning, rateJa, () => {
+        if (!isPlaying) return;
+        // Step 4: wait, then next
+        autoChain = setTimeout(() => {
+          if (!isPlaying) return;
+          studyIdx++;
+          startAutoChain();
+        }, pauseJa);
+      });
+    }, pauseEn);
+  });
+}
+
+function stopAuto() {
+  clearTimeout(autoChain);
+  stopSpeak();
+}
+
+function setSpeed(i) {
+  speedIdx = i;
+  document.querySelectorAll('.speed-btn').forEach((b, j) => b.classList.toggle('on', j === i));
+  if (studyMode === 'auto' && isPlaying) startAutoChain();
+}
+
+function speakExample() {
+  if (studyIdx >= studyQueue.length) return;
+  speakEN(studyQueue[studyIdx][2]);
+}
+
+// ════════════════════════════════════════
+// TTS with onend chain
+// ════════════════════════════════════════
+function setIndicator(on) {
+  document.getElementById('audio-indicator').classList.toggle('on', on);
+}
+
+function speakENChain(text, rate, onDone) {
+  if (!window.speechSynthesis) { onDone && onDone(); return; }
+  speechSynthesis.cancel();
+  text = text.replace(/\s*~\s*/g, ' ').trim();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US';
+  u.rate = rate;
+  const voices = speechSynthesis.getVoices();
+  const v = voices.find(v => v.lang === 'en-US' && v.localService) || voices.find(v => v.lang.startsWith('en')) || null;
+  if (v) u.voice = v;
+  u.onstart = () => setIndicator(true);
+  u.onend = () => { setIndicator(false); onDone && onDone(); };
+  u.onerror = () => { setIndicator(false); onDone && onDone(); };
+  speechSynthesis.speak(u);
+}
+
+function speakJAChain(text, rate, onDone) {
+  if (!window.speechSynthesis) { onDone && onDone(); return; }
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'ja-JP';
+  u.rate = rate;
+  const voices = speechSynthesis.getVoices();
+  const v = voices.find(v => v.lang === 'ja-JP' && v.localService) || voices.find(v => v.lang.startsWith('ja')) || null;
+  if (v) u.voice = v;
+  u.onstart = () => setIndicator(true);
+  u.onend = () => { setIndicator(false); onDone && onDone(); };
+  u.onerror = () => { setIndicator(false); onDone && onDone(); };
+  speechSynthesis.speak(u);
+}
+
+function speakEN(text) {
+  if (!window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  text = text.replace(/\s*~\s*/g, ' ').trim();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US';
+  u.rate = 0.85;
+  const voices = speechSynthesis.getVoices();
+  const v = voices.find(v => v.lang === 'en-US' && v.localService) || voices.find(v => v.lang.startsWith('en')) || null;
+  if (v) u.voice = v;
+  u.onstart = () => setIndicator(true);
+  u.onend = () => setIndicator(false);
+  u.onerror = () => setIndicator(false);
+  speechSynthesis.speak(u);
+}
+
+function speakJA(text) {
+  if (!window.speechSynthesis) return;
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'ja-JP';
+  u.rate = 0.9;
+  const voices = speechSynthesis.getVoices();
+  const v = voices.find(v => v.lang === 'ja-JP' && v.localService) || voices.find(v => v.lang.startsWith('ja')) || null;
+  if (v) u.voice = v;
+  u.onstart = () => setIndicator(true);
+  u.onend = () => setIndicator(false);
+  u.onerror = () => setIndicator(false);
+  speechSynthesis.speak(u);
+}
+
+function stopSpeak() {
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  setIndicator(false);
+}
+
+// iOS Safari voice load
+if (window.speechSynthesis) {
+  speechSynthesis.onvoiceschanged = () => {};
+}
+
+// ════════════════════════════════════════
+// QUIZ
+// ════════════════════════════════════════
+let quizQueue = [];
+let quizIdx = 0;
+let quizCorrectStreak = 0;
+
+function startQuiz() {
+  quizQueue = [...ALL_WORDS].sort(() => Math.random() - 0.5);
+  quizIdx = 0;
+  quizCorrectStreak = 0;
+  showPage('quiz');
+  startStudyTimer();
+  showQuizCard();
+}
+
+function showQuizCard() {
+  if (quizIdx >= quizQueue.length) {
+    document.getElementById('quiz-phrase').textContent = '完了！';
+    document.getElementById('quiz-options').innerHTML = '';
+    return;
+  }
+  
+  const [phrase, meaning] = quizQueue[quizIdx];
+  document.getElementById('quiz-phrase').textContent = phrase;
+  
+  // Generate 3 wrong answers
+  const wrong = ALL_WORDS.filter(w => w[1] !== meaning).sort(() => Math.random() - 0.5).slice(0, 3).map(w => w[1]);
+  const all = [meaning, ...wrong].sort(() => Math.random() - 0.5);
+  
+  const wrap = document.getElementById('quiz-options');
+  wrap.innerHTML = '';
+  all.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-opt';
+    btn.textContent = opt;
+    btn.onclick = () => answerQuiz(opt, meaning);
+    wrap.appendChild(btn);
+  });
+  
+  document.getElementById('quiz-result').classList.remove('show');
+}
+
+function answerQuiz(selected, correct) {
+  const isCorrect = selected === correct;
+  const opts = document.querySelectorAll('.quiz-opt');
+  
+  opts.forEach(opt => {
+    opt.classList.add('disabled');
+    if (opt.textContent === correct) opt.classList.add('correct');
+    if (opt.textContent === selected && !isCorrect) opt.classList.add('wrong');
+  });
+  
+  const phrase = quizQueue[quizIdx][0];
+  const lv = levels[phrase] || 1;
+  
+  if (isCorrect) {
+    quizCorrectStreak++;
+    if (lv < 5) {
+      levels[phrase] = Math.min(5, lv + (quizCorrectStreak >= 2 ? 2 : 1));
+    }
+    document.getElementById('result-icon').textContent = '🎉';
+    document.getElementById('result-text').textContent = '正解！';
+  } else {
+    quizCorrectStreak = 0;
+    if (lv > 1) {
+      levels[phrase] = Math.max(1, lv - 1);
+    }
+    document.getElementById('result-icon').textContent = '❌';
+    document.getElementById('result-text').textContent = `不正解。正解は「${correct}」`;
+  }
+  
+  save();
+  document.getElementById('quiz-result').classList.add('show');
+}
+
+function nextQuiz() {
+  quizIdx++;
+  showQuizCard();
+}
+
+// ════════════════════════════════════════
+// HOME & STATS
+// ════════════════════════════════════════
+function renderHome() {
+  const masters = ALL_WORDS.filter(w => levels[w[0]] === 5).length;
+  const pct = Math.round(masters / ALL_WORDS.length * 100);
+  
+  document.getElementById('home-master-pct').textContent = pct + '%';
+  document.getElementById('home-master-count').textContent = masters + ' / ' + ALL_WORDS.length;
+  document.getElementById('home-streak').textContent = streak;
+  document.getElementById('home-time').textContent = studyTime;
+  
+  // Units
+  const grid = document.getElementById('unit-grid');
+  grid.innerHTML = '';
+  UNITS.forEach((unit, i) => {
+    const mastered = unit.filter(w => levels[w[0]] === 5).length;
+    const prog = Math.round(mastered / unit.length * 100);
+    
+    const card = document.createElement('div');
+    card.className = 'unit-card';
+    card.onclick = () => startUnit(i);
+    card.innerHTML = `
+      <div class="unit-num">Unit ${i + 1}</div>
+      <div class="unit-prog">${prog}%</div>
+      <div class="unit-bar"><div class="unit-fill" style="width:${prog}%"></div></div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function renderStats() {
+  document.getElementById('stats-streak').textContent = streak;
+  document.getElementById('stats-time').textContent = studyTime;
+  
+  // Level distribution
+  const counts = [0, 0, 0, 0, 0];
+  ALL_WORDS.forEach(w => {
+    const lv = levels[w[0]] || 1;
+    counts[lv - 1]++;
+  });
+  
+  const chart = document.getElementById('level-chart');
+  chart.innerHTML = '';
+  const names = ['🌱 はじめまして', '🌿 なんとなく', '🌳 だいたいOK', '⭐ 自信あり', '🏆 マスター'];
+  const colors = ['var(--lv1)', 'var(--lv2)', 'var(--lv3)', 'var(--lv4)', 'var(--lv5)'];
+  
+  counts.forEach((c, i) => {
+    const pct = Math.round(c / ALL_WORDS.length * 100);
+    chart.innerHTML += `
+      <div class="level-bar">
+        <div class="level-bar-label">${names[i]}</div>
+        <div class="level-bar-fill">
+          <div class="level-bar-inner" style="width:${pct}%;background:${colors[i]}"></div>
+          <div class="level-bar-count">${c}</div>
+        </div>
+      </div>
+    `;
+  });
+}
+
+// ════════════════════════════════════════
+// NAV
+// ════════════════════════════════════════
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.getElementById('nav-btn').style.display = id === 'home' ? 'none' : 'block';
+  
+  if (id === 'home') renderHome();
+  if (id === 'stats') renderStats();
+  if (id !== 'study' && id !== 'quiz') {
+    stopAuto();
+    updateStudyTime();
+  }
+}
+
+function navBack() {
+  stopAuto();
+  updateStudyTime();
+  showPage('home');
+}
+
+// ════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════
+renderHome();
 </script>
 </body>
 </html>
